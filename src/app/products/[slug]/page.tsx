@@ -25,6 +25,8 @@ import {
   Flag,
   ArrowRight,
   Info,
+  Camera,
+  RotateCw,
 } from "lucide-react";
 
 export default function ProductDetailPage() {
@@ -35,6 +37,8 @@ export default function ProductDetailPage() {
     getDynamicProductBySlug(slug) || INITIAL_19_PRODUCTS.find((p) => p.slug === slug);
 
   const [selectedCurrency, setSelectedCurrency] = useState<string>("INR");
+  const [activeMediaView, setActiveMediaView] = useState<"photo" | "360">("photo");
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number>(0);
   const [reportModalOpen, setReportModalOpen] = useState<boolean>(false);
   const [reportSubmitted, setReportSubmitted] = useState<boolean>(false);
   const [reportReason, setReportReason] = useState<string>("");
@@ -151,13 +155,89 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* 360 Degree Interactive Viewer */}
-            <div className="pt-2">
-              <Product360Viewer
-                productName={product.name}
-                category={product.categoryName}
-                sku={product.sku}
-              />
+            {/* Visual Showcase: Industrial Photography & 360° Rotator */}
+            <div className="rounded-3xl border border-zinc-200 bg-white overflow-hidden shadow-xs">
+              {/* Media Mode Tabs */}
+              <div className="flex items-center justify-between p-3 bg-zinc-50 border-b border-zinc-200">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setActiveMediaView("photo")}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      activeMediaView === "photo"
+                        ? "bg-zinc-950 text-white shadow-xs"
+                        : "bg-white text-zinc-600 hover:bg-zinc-200"
+                    }`}
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>Industrial Photography</span>
+                  </button>
+
+                  <button
+                    onClick={() => setActiveMediaView("360")}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      activeMediaView === "360"
+                        ? "bg-zinc-950 text-white shadow-xs"
+                        : "bg-white text-zinc-600 hover:bg-zinc-200"
+                    }`}
+                  >
+                    <RotateCw className="w-3.5 h-3.5" />
+                    <span>360° Interactive View</span>
+                  </button>
+                </div>
+
+                <span className="text-[11px] text-zinc-400 font-mono hidden sm:inline">
+                  Verified Master Asset
+                </span>
+              </div>
+
+              {/* View Content */}
+              {activeMediaView === "photo" ? (
+                <div className="p-4 space-y-4">
+                  <div className="relative w-full h-80 sm:h-[420px] rounded-2xl overflow-hidden bg-zinc-950 flex items-center justify-center">
+                    <img
+                      src={
+                        (product.galleryImages && product.galleryImages[selectedPhotoIndex]) ||
+                        product.imageUrl ||
+                        "https://images.unsplash.com/photo-1584744982491-665216d95f8b?auto=format&fit=crop&w=800&q=80"
+                      }
+                      alt={product.name}
+                      className="w-full h-full object-cover object-center"
+                    />
+                    <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-black/75 backdrop-blur-md text-[11px] font-mono text-white flex items-center gap-2">
+                      <span>Photo {selectedPhotoIndex + 1} of {(product.galleryImages?.length || 1)}</span>
+                      <span>&bull;</span>
+                      <span className="text-zinc-300">High-Resolution Capture</span>
+                    </div>
+                  </div>
+
+                  {/* Thumbnail Row */}
+                  {product.galleryImages && product.galleryImages.length > 1 && (
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                      {product.galleryImages.map((imgUrl, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedPhotoIndex(idx)}
+                          className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${
+                            selectedPhotoIndex === idx
+                              ? "border-zinc-950 ring-2 ring-zinc-950/20 scale-105"
+                              : "border-zinc-200 hover:border-zinc-400 opacity-75 hover:opacity-100"
+                          }`}
+                        >
+                          <img src={imgUrl} alt="Thumbnail" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4">
+                  <Product360Viewer
+                    productName={product.name}
+                    category={product.categoryName}
+                    sku={product.sku}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Full Description & Limitations */}

@@ -362,7 +362,22 @@ export default function ManagementPortalPage() {
                     return (
                       <tr key={p.id} className="hover:bg-zinc-50/80">
                         <td className="p-3.5 font-mono font-bold text-zinc-700">{p.sku}</td>
-                        <td className="p-3.5 font-bold text-zinc-950">{p.name}</td>
+                        <td className="p-3.5 font-bold text-zinc-950">
+                          <div className="flex items-center gap-2.5">
+                            {p.imageUrl ? (
+                              <img
+                                src={p.imageUrl}
+                                alt={p.name}
+                                className="w-8 h-8 rounded-lg object-cover border border-zinc-200 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-xs shrink-0">
+                                📦
+                              </div>
+                            )}
+                            <span>{p.name}</span>
+                          </div>
+                        </td>
                         <td className="p-3.5 font-mono text-zinc-500">{p.inventory.locationCode}</td>
                         <td className="p-3.5 font-bold text-zinc-900">
                           {p.inventory.currentStock} {p.unitOfMeasure}s
@@ -510,7 +525,22 @@ export default function ManagementPortalPage() {
                     .map((p) => (
                       <tr key={p.id} className="hover:bg-zinc-50/80">
                         <td className="p-3.5 font-mono font-bold text-zinc-700">{p.sku}</td>
-                        <td className="p-3.5 font-bold text-zinc-950">{p.name}</td>
+                        <td className="p-3.5 font-bold text-zinc-950">
+                          <div className="flex items-center gap-2.5">
+                            {p.imageUrl ? (
+                              <img
+                                src={p.imageUrl}
+                                alt={p.name}
+                                className="w-8 h-8 rounded-lg object-cover border border-zinc-200 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-xs shrink-0">
+                                📦
+                              </div>
+                            )}
+                            <span>{p.name}</span>
+                          </div>
+                        </td>
                         <td className="p-3.5 text-zinc-600">{p.categoryName}</td>
                         <td className="p-3.5 font-mono text-zinc-500">{p.unitOfMeasure}</td>
                         <td className="p-3.5 font-bold text-zinc-900">₹{p.indicativePriceInr.toFixed(2)}</td>

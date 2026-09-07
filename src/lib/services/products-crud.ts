@@ -1,4 +1,4 @@
-import { INITIAL_19_PRODUCTS, ProductItem } from "../catalog-data";
+import { INITIAL_19_PRODUCTS, ProductItem, PRODUCT_IMAGE_MAP } from "../catalog-data";
 import { logAuditEvent } from "../audit";
 
 // Extra realistic demo products
@@ -183,6 +183,10 @@ export const EXTRA_DEMO_PRODUCTS: ProductItem[] = [
 // In-memory master store starting with initial 19 + extra demo products
 const dynamicProductsStore = new Map<string, ProductItem>();
 [...INITIAL_19_PRODUCTS, ...EXTRA_DEMO_PRODUCTS].forEach((p) => {
+  if (!p.imageUrl && PRODUCT_IMAGE_MAP[p.slug]) {
+    p.imageUrl = PRODUCT_IMAGE_MAP[p.slug].image;
+    p.galleryImages = PRODUCT_IMAGE_MAP[p.slug].gallery;
+  }
   dynamicProductsStore.set(p.id, JSON.parse(JSON.stringify(p)));
 });
 

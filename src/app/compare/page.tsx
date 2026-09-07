@@ -122,6 +122,23 @@ function CompareContent() {
             </thead>
             <tbody className="divide-y divide-zinc-200">
               <tr>
+                <td className="p-4 font-semibold text-zinc-600 bg-zinc-50/50">Product Photo</td>
+                {selectedProducts.map((p) => (
+                  <td key={p.id} className="p-4 border-l border-zinc-200">
+                    <div className="w-24 h-24 rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200">
+                      {p.imageUrl ? (
+                        <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-400">
+                          No Photo
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              <tr>
                 <td className="p-4 font-semibold text-zinc-600 bg-zinc-50/50">Category</td>
                 {selectedProducts.map((p) => (
                   <td key={p.id} className="p-4 border-l border-zinc-200 text-zinc-800">
