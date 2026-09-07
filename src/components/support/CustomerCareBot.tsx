@@ -55,11 +55,10 @@ export const CustomerCareBot: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputVal.trim() || isTyping) return;
+  const sendUserPrompt = async (text: string) => {
+    if (!text.trim() || isTyping) return;
 
-    const userText = inputVal.trim();
+    const userText = text.trim();
     const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     const updated = [
@@ -106,6 +105,11 @@ export const CustomerCareBot: React.FC = () => {
     } finally {
       setIsTyping(false);
     }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await sendUserPrompt(inputVal);
   };
 
   // Dispatch Chat to Management and Owner Portal
@@ -238,6 +242,25 @@ export const CustomerCareBot: React.FC = () => {
               </div>
             )}
             <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Prompt Suggestions Chips */}
+          <div className="px-3 py-2 bg-white border-t border-zinc-100 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            {[
+              "Caustic Soda SDS status",
+              "How to buy nitrile gloves?",
+              "Print warehouse bin labels",
+              "Zero-hallucination policy",
+            ].map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => sendUserPrompt(chip)}
+                className="px-2.5 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-[10px] whitespace-nowrap font-medium transition-colors cursor-pointer shrink-0"
+              >
+                {chip}
+              </button>
+            ))}
           </div>
 
           {/* Input Form */}

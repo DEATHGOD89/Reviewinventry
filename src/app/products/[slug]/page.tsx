@@ -33,6 +33,7 @@ import {
 import { WarehouseLabelModal } from "@/components/ui/WarehouseLabelModal";
 import { SdsDocumentViewer } from "@/components/ui/SdsDocumentViewer";
 import { ProductEditModal } from "@/components/management/ProductEditModal";
+import { SpecSheetModal } from "@/components/ui/SpecSheetModal";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -46,6 +47,7 @@ export default function ProductDetailPage() {
   const [activeMediaView, setActiveMediaView] = useState<"photo" | "360">("photo");
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number>(0);
   const [labelModalOpen, setLabelModalOpen] = useState<boolean>(false);
+  const [specSheetModalOpen, setSpecSheetModalOpen] = useState<boolean>(false);
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
   const [reportModalOpen, setReportModalOpen] = useState<boolean>(false);
   const [reportSubmitted, setReportSubmitted] = useState<boolean>(false);
@@ -137,6 +139,13 @@ export default function ProductDetailPage() {
           >
             <QrCode className="w-3.5 h-3.5" />
             <span>Print Bin Label</span>
+          </button>
+          <button
+            onClick={() => setSpecSheetModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition-colors"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>TDS Datasheet</span>
           </button>
           <button
             onClick={() => setEditModalOpen(true)}
@@ -717,6 +726,13 @@ export default function ProductDetailPage() {
         product={product}
         isOpen={labelModalOpen}
         onClose={() => setLabelModalOpen(false)}
+      />
+
+      {/* Official VeriSpec Technical Datasheet (TDS) Printable Modal */}
+      <SpecSheetModal
+        product={product}
+        isOpen={specSheetModalOpen}
+        onClose={() => setSpecSheetModalOpen(false)}
       />
 
       {/* Product Edit Modal for Staff / Owner */}
