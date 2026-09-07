@@ -195,50 +195,12 @@ export const HeroShowcase: React.FC = () => {
 
       {/* Main Interactive Showcase Canvas */}
       <div className="max-w-6xl mx-auto relative rounded-[2.5rem] bg-gradient-to-b from-zinc-100 via-zinc-150 to-zinc-200/80 p-4 sm:p-8 md:p-10 border border-zinc-300/80 shadow-inner">
-        {/* Floating Callout 1 (Top Left): Real-Time Warehouse Telemetry */}
-        <div className="hidden xl:flex absolute top-10 left-10 z-20 flex-col items-start gap-1 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-zinc-200 shadow-lg max-w-xs transition-all hover:scale-105">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs">
-              <Warehouse className="w-3.5 h-3.5" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-zinc-950 block">Live Stock Telemetry</span>
-              <span className="text-[10px] text-emerald-700 font-semibold font-mono">100% Audit-Logged</span>
-            </div>
-          </div>
-          <p className="text-[11px] text-zinc-600 mt-1 leading-snug">
-            All stock movements in <strong className="text-zinc-900">{product.warehouseLocation}</strong> require mandatory recorded reasons before execution.
-          </p>
-          <div className="mt-2 text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 border border-zinc-200">
-            Available: {product.stockUnits.toLocaleString()} units
-          </div>
-        </div>
-
-        {/* Floating Callout 2 (Top Right): Zero-Hallucination Gate */}
-        <div className="hidden xl:flex absolute top-10 right-10 z-20 flex-col items-start gap-1 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-zinc-200 shadow-lg max-w-xs transition-all hover:scale-105">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-amber-600 text-white flex items-center justify-center text-xs">
-              <ShieldCheck className="w-3.5 h-3.5" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-zinc-950 block">Zero-Hallucination Policy</span>
-              <span className="text-[10px] text-amber-800 font-semibold">Strict Verification Gate</span>
-            </div>
-          </div>
-          <p className="text-[11px] text-zinc-600 mt-1 leading-snug">
-            Chemical hazards, permeation times, and standards are never assumed. Unverified items remain strictly labeled <strong className="text-zinc-900">DRAFT</strong>.
-          </p>
-          <div className="mt-2 text-[10px] font-mono px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200">
-            Standard: {product.standard}
-          </div>
-        </div>
-
         {/* Equipment Selector Tabs */}
         <div className="relative z-10 flex flex-col items-center mb-6">
-          <div className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
+          <div className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2.5">
             Select Flagship Industrial Safety Asset
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-full bg-white/90 border border-zinc-200 shadow-xs max-w-full overflow-x-auto">
+          <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-full bg-white/95 border border-zinc-200/90 shadow-sm max-w-full">
             {SHOWCASE_PRODUCTS.map((item, idx) => (
               <button
                 key={item.id}
@@ -264,26 +226,72 @@ export const HeroShowcase: React.FC = () => {
               </button>
             ))}
           </div>
-        </div>
 
-        {/* Central High-Definition Equipment Showcase Stage */}
-        <div className="relative z-10 flex flex-col items-center justify-center">
-          {/* Angle / Telemetry Toggle Buttons */}
-          <div className="flex items-center gap-2 mb-4">
+          {/* Angle / Telemetry Toggle Sub-Buttons */}
+          <div className="flex items-center gap-2 mt-4">
             {product.angles.map((angle, idx) => (
               <button
                 key={angle.title}
                 onClick={() => setActiveAngleIdx(idx)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   activeAngleIdx === idx
-                    ? "bg-zinc-900 text-white shadow-xs"
-                    : "bg-white/85 text-zinc-700 border border-zinc-200 hover:bg-white"
+                    ? "bg-zinc-900 text-white shadow-xs font-semibold"
+                    : "bg-white/90 text-zinc-700 border border-zinc-200 hover:bg-white"
                 }`}
               >
                 {angle.title}
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Telemetry & Compliance Verification Cards (Non-Overlapping Responsive Grid) */}
+        <div className="relative z-10 w-full max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6">
+          {/* Card 1: Real-Time Warehouse Telemetry */}
+          <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-zinc-200/90 shadow-sm flex items-start gap-3 transition-all hover:border-zinc-300">
+            <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+              <Warehouse className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold text-zinc-950">Live Stock Telemetry</span>
+                <span className="text-[9px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
+                  100% Audit-Logged
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-600 mt-1 leading-snug">
+                All movements in <strong className="text-zinc-900 font-mono">{product.warehouseLocation}</strong> require recorded justification.
+              </p>
+              <div className="mt-2 text-[10px] font-mono px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-800 border border-zinc-200 inline-block font-semibold">
+                Available: <span className="text-emerald-700 font-bold">{product.stockUnits.toLocaleString()} units</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Zero-Hallucination Policy Gate */}
+          <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-zinc-200/90 shadow-sm flex items-start gap-3 transition-all hover:border-zinc-300">
+            <div className="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold text-zinc-950">Zero-Hallucination Policy</span>
+                <span className="text-[9px] font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                  Strict Verification Gate
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-600 mt-1 leading-snug">
+                Chemical hazards and standards are never assumed. Unverified items remain strictly labeled <strong className="text-zinc-900">DRAFT</strong>.
+              </p>
+              <div className="mt-2 text-[10px] font-mono px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200 inline-block font-semibold">
+                Standard: <span className="font-bold">{product.standard}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Central High-Definition Equipment Showcase Stage */}
+        <div className="relative z-10 flex flex-col items-center justify-center">
 
           {/* Main Equipment Image Stage Card */}
           <div className="relative w-full max-w-3xl aspect-[16/10] sm:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl border-4 border-zinc-800/20 bg-zinc-950 group">
