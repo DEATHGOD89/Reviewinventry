@@ -55,49 +55,11 @@ export const CustomerCareBot: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Website-trained intelligent response generator
-  const generateWebsiteTrainedResponse = (userInput: string): string => {
-    const query = userInput.toLowerCase();
-
-    // 1. Non-Store / Purchase Question
-    if (query.includes("buy") || query.includes("order") || query.includes("cart") || query.includes("price") || query.includes("checkout")) {
-      return "That's a very common question! To keep our reviews completely unbiased, VeriSpec is an inventory intelligence and review platform, NOT an online store. We don't sell directly or take payments. However, on every product page, you'll see a 'Buy from external seller' button that links directly to verified suppliers (like IndiaMART, Moglix, or Amazon) in a new tab.";
-    }
-
-    // 2. Caustic Soda / Chemical Safety / SDS
-    if (query.includes("caustic") || query.includes("chemical") || query.includes("sds") || query.includes("msds") || query.includes("acid")) {
-      return "Safety is our highest priority. For chemical products like Caustic Soda (VS-CHM-011) or Suma Det., all chemical hazard classes, active ingredients, and required PPE are strictly held in 'Requires manufacturer SDS/label verification' status. We never invent or guess chemical formulas until official manufacturer laboratory sheets are uploaded!";
-    }
-
-    // 3. Gloves / PPE / Sizing
-    if (query.includes("glove") || query.includes("nitrile") || query.includes("en 374") || query.includes("latex")) {
-      return "Regarding hand protection: We currently catalogue standard Nitrile gloves, Cotton knitted gloves, Heavy-duty Chemical gloves, Black nitrile gloves, and Dielectric Electrical insulating gloves. All barrier claims (such as EN ISO 374 permeation times) are indexed transparently with verified documentation tags.";
-    }
-
-    // 4. Safety Shoes / Footwear
-    if (query.includes("shoe") || query.includes("boot") || query.includes("toe")) {
-      return "Our Safety Shoes (VS-PPE-008) record includes 200-Joule toe impact resistance placeholders and puncture plate standards pending IS 15298 / EN ISO 20345 confirmation. You can use our Compare tool to stack it up against cleanroom shoe covers!";
-    }
-
-    // 5. Stock / Inventory / Warehouse question
-    if (query.includes("stock") || query.includes("inventory") || query.includes("warehouse") || query.includes("wh-")) {
-      return "Our inventory is tracked across two primary facilities: Central Logistics (WH-MAIN-01) and Hazardous Chemical Vault 2 (WH-CHEM-02). Any stock adjustments made by management staff strictly require an immutable audit trail and a mandatory justification reason.";
-    }
-
-    // 6. Review / Feedback
-    if (query.includes("review") || query.includes("rating") || query.includes("fake") || query.includes("auditor")) {
-      return "Every single review on VeriSpec undergoes human moderation before publication. We prohibit promotional spam, fabricated expert quotes, and paid testimonials. Only registered users and verified safety auditors can contribute assessments.";
-    }
-
-    // 7. General Friendly Human Help
-    return `I hear you! As a specialist here at VeriSpec, I can confirm that all 19 master products in our catalogue are rigorously tracked. If you're experiencing any issue with specifications, missing documents, or supplier links, let me know and I can immediately file a priority summary ticket directly to our management team!`;
-  };
-
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputVal.trim()) return;
+    if (!inputVal.trim() || isTyping) return;
 
-    const userText = inputVal;
+    const userText = inputVal.trim();
     const timeNow = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     const updated = [
@@ -108,9 +70,22 @@ export const CustomerCareBot: React.FC = () => {
     setInputVal("");
     setIsTyping(true);
 
-    // Simulate realistic human typing delay
-    setTimeout(() => {
-      const botReply = generateWebsiteTrainedResponse(userText);
+    try {
+      const res = await fetch("/api/support/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: updated,
+          repName: activeRep.name,
+          repRole: activeRep.role,
+        }),
+      });
+
+      const data = await res.json();
+      const botReply =
+        data.reply ||
+        "I'm right here to assist! Could you describe what you need help with in our inventory or specifications?";
+
       setMessages([
         ...updated,
         {
@@ -119,8 +94,18 @@ export const CustomerCareBot: React.FC = () => {
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
+    } catch (err) {
+      setMessages([
+        ...updated,
+        {
+          sender: "rep" as const,
+          text: `I'm right here with you! Could you describe what issue you're encountering on the platform?`,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 700);
+    }
   };
 
   // Dispatch Chat to Management and Owner Portal

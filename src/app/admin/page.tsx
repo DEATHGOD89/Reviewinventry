@@ -67,8 +67,8 @@ export default function OwnerAdminPortalPage() {
   );
 
   // OpenCode Zen / AI Provider State
-  const [aiEndpoint, setAiEndpoint] = useState("https://api.opencodezen.com/v1");
-  const [aiModel, setAiModel] = useState("opencode-zen-latest");
+  const [aiEndpoint, setAiEndpoint] = useState("https://opencode.ai/zen/v1");
+  const [aiModel, setAiModel] = useState("claude-haiku-4-5");
   const [aiApiKeyInput, setAiApiKeyInput] = useState("");
   const [aiEnabled, setAiEnabled] = useState(true);
   const [aiTestResult, setAiTestResult] = useState<string | null>(null);
@@ -101,12 +101,27 @@ export default function OwnerAdminPortalPage() {
     );
   };
 
-  const handleTestOpenCodeZen = () => {
-    if (!aiApiKeyInput) {
-      setAiTestResult("⚠️ Please enter your OpenCode Zen API key to test the connection.");
-      return;
+  const handleTestOpenCodeZen = async () => {
+    setAiTestResult("Connecting to OpenCode Zen endpoint...");
+    try {
+      const res = await fetch("/api/admin/ai-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          apiKey: aiApiKeyInput,
+          endpoint: aiEndpoint,
+          model: aiModel,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAiTestResult(`✓ Success: ${data.message}`);
+      } else {
+        setAiTestResult(`⚠️ ${data.message}`);
+      }
+    } catch (err: unknown) {
+      setAiTestResult(`Connection error: ${err instanceof Error ? err.message : String(err)}`);
     }
-    setAiTestResult("✓ Testing OpenCode Zen endpoint... Authenticated successfully (Mock Verification: Server connection established).");
   };
 
   const filteredLogs = auditLogs.filter(
