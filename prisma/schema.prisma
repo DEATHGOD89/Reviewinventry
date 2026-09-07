@@ -1,0 +1,815 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RoleType {
+  PUBLIC_VISITOR
+  REGISTERED_REVIEWER
+  MANAGEMENT_STAFF
+  MODERATOR
+  OWNER_ADMIN
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+  DISCONTINUED
+  OUT_OF_STOCK
+  PENDING_VERIFICATION
+}
+
+enum DataConfidenceLevel {
+  VERIFIED_BY_OWNER
+  MANUFACTURER_SOURCE
+  TRUSTED_SOURCE
+  USER_SUBMITTED
+  UNVERIFIED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+  FLAGGED
+}
+
+enum MovementType {
+  STOCK_IN
+  STOCK_OUT
+  ADJUSTMENT
+  TRANSFER
+  DAMAGE
+  RETURN
+  EXPIRY
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  SENT
+  RECEIVED
+  CANCELLED
+}
+
+enum DocumentType {
+  SDS_MSDS
+  TECH_SHEET
+  MANUAL
+  CERTIFICATE
+  OTHER
+}
+
+// -------------------------------------------------------------
+// 1. Auth & RBAC Models
+// -------------------------------------------------------------
+
+model User {
+  id               String       @id @default(uuid())
+  email            String       @unique
+  passwordHash     String
+  name             String
+  avatar           String?
+  role             RoleType     @default(REGISTERED_REVIEWER)
+  isEmailVerified  Boolean      @default(false)
+  isActive         Boolean      @default(true)
+  isMfaEnabled     Boolean      @default(false)
+  mfaSecret        String?
+  lastLoginAt      DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  reviews          Review[]
+  reviewVotes      ReviewVote[]
+  auditLogs        AuditLog[]
+  inventoryMoves   InventoryMovement[]
+  purchaseOrders   PurchaseOrder[]
+  verificationTasks VerificationTask[]
+  notifications    Notification[]
+  questions        ProductQuestion[]
+  answers          ProductAnswer[]
+
+  @@index([email])
+  @@index([role])
+}
+
+// -------------------------------------------------------------
+// 2. Product Master & Taxonomy
+// -------------------------------------------------------------
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String     @unique
+  description String?
+  parentId    String?
+  parent      Category?  @relation("SubCategories", fields: [parentId], references: [id])
+  children    Category[] @relation("SubCategories")
+  displayOrder Int       @default(0)
+  icon        String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  products    Product[]
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  logoUrl     String?
+  website     String?
+  isVerified  Boolean   @default(false)
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+
+  @@index([slug])
+}
+
+model Manufacturer {
+  id              String    @id @default(uuid())
+  name            String
+  countryOfOrigin String?
+  contactEmail    String?
+  isVerified      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  products        Product[]
+}
+
+model Product {
+  id                     String              @id @default(uuid())
+  name                   String
+  slug                   String              @unique
+  sku                    String?             @unique
+  barcode                String?
+  categoryId             String
+  category               Category            @relation(fields: [categoryId], references: [id])
+  brandId                String?
+  brand                  Brand?              @relation(fields: [brandId], references: [id])
+  manufacturerId         String?
+  manufacturer           Manufacturer?       @relation(fields: [manufacturerId], references: [id])
+  productType            String?
+  modelNumber            String?
+  countryOfOrigin        String?
+  unitOfMeasure          String              @default("piece") // piece, pair, box, pack, bottle, etc.
+  status                 ProductStatus       @default(DRAFT)
+  dataConfidenceLevel    DataConfidenceLevel @default(UNVERIFIED)
+  shortDescription       String?
+  fullDescription        String?
+  benefits               String?
+  recommendedUseCases    String?
+  limitationsAndWarnings String?
+  features               String?
+  packageIncluded        String?
+  userInstructions       String?
+  storageInstructions    String?
+  disposalInstructions   String?
+  warrantyInfo           String?
+  contentSource          String?
+  sourceUrl              String?
+  lastVerifiedAt         DateTime?
+  nextReviewAt           DateTime?
+  isPubliclyVisible      Boolean             @default(false)
+  createdById            String?
+  updatedById            String?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  // Relationships
+  variants               ProductVariant[]
+  specifications         ProductSpecification[]
+  documents              ProductDocument[]
+  images                 ProductImage[]
+  tags                   ProductTag[]
+  keywords               ProductKeyword[]
+  ppeDetail              PpeDetail?
+  chemicalDetail         ChemicalDetail?
+  inventoryBalances      InventoryBalance[]
+  inventoryMovements     InventoryMovement[]
+  inventoryBatches       InventoryBatch[]
+  supplierProducts       SupplierProduct[]
+  purchaseOrderItems     PurchaseOrderItem[]
+  privatePriceRecords    PrivatePriceRecord[]
+  publicPriceRecords     PublicPriceRecord[]
+  externalPurchaseLinks  ExternalPurchaseLink[]
+  reviews                Review[]
+  questions              ProductQuestion[]
+  aiEnrichmentJobs       AiEnrichmentJob[]
+
+  @@index([slug])
+  @@index([sku])
+  @@index([status])
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([isPubliclyVisible])
+}
+
+model ProductVariant {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantName String
+  sku         String?  @unique
+  barcode     String?
+  color       String?
+  size        String?
+  material    String?
+  packSize    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  inventoryBalances  InventoryBalance[]
+  inventoryMovements InventoryMovement[]
+  inventoryBatches   InventoryBatch[]
+  purchaseOrderItems PurchaseOrderItem[]
+
+  @@index([productId])
+  @@index([sku])
+}
+
+model ProductSpecification {
+  id           String   @id @default(uuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  specKey      String
+  specValue    String
+  groupName    String   @default("General")
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([productId])
+}
+
+model ProductDocument {
+  id            String       @id @default(uuid())
+  productId     String
+  product       Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  documentType  DocumentType @default(TECH_SHEET)
+  title         String
+  fileUrl       String
+  fileSizeBytes Int?
+  mimeType      String?
+  versionDate   DateTime?
+  isPublic      Boolean      @default(true)
+  isVerified    Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+
+  @@index([productId])
+}
+
+model ProductImage {
+  id             String   @id @default(uuid())
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url            String
+  altText        String
+  isPrimary      Boolean  @default(false)
+  displayOrder   Int      @default(0)
+  creditSource   String?
+  licenseType    String?
+  approvalStatus String   @default("APPROVED") // PENDING, APPROVED, REJECTED
+  createdAt      DateTime @default(now())
+
+  @@index([productId])
+  @@index([isPrimary])
+}
+
+model ProductTag {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       String
+
+  @@index([productId])
+  @@index([tag])
+}
+
+model ProductKeyword {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  keyword   String
+  isSynonym Boolean @default(false)
+
+  @@index([productId])
+  @@index([keyword])
+}
+
+// -------------------------------------------------------------
+// 3. Specialized Product Details (PPE & Chemicals)
+// -------------------------------------------------------------
+
+model PpeDetail {
+  id                  String   @id @default(uuid())
+  productId           String   @unique
+  product             Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  protectionType      String?
+  intendedWorkplace   String?
+  material            String?
+  thickness           String?
+  sizeChartJson       String?
+  isReusable          Boolean?
+  isSterile           Boolean?
+  isPowdered          Boolean?
+  latexFreeStatus     String?  @default("Requires verification") // Requires verification, Latex-Free, Contains Latex
+  applicableStandards String?  @default("Requires manufacturer documentation")
+  careInstructions    String?
+  compatibilityNotes  String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model ChemicalDetail {
+  id                      String    @id @default(uuid())
+  productId               String    @unique
+  product                 Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productForm             String?   // Liquid, Powder, Gel, Concentrate, Ready-to-use
+  activeIngredients       String?   @default("Requires manufacturer SDS/label verification")
+  dilutionRatio           String?
+  phValue                 String?   @default("Requires manufacturer SDS/label verification")
+  fragrance               String?
+  surfaceCompatibility    String?
+  hazardClassification    String?   @default("Requires manufacturer SDS/label verification")
+  requiredPpe             String?   @default("Requires manufacturer SDS/label verification")
+  firstAidReference       String?   @default("Requires manufacturer SDS/label verification")
+  storageTemperatureRules String?
+  sdsVersionDate          DateTime?
+  shelfLifeMonths         Int?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+}
+
+// -------------------------------------------------------------
+// 4. Inventory & Warehouse Operations
+// -------------------------------------------------------------
+
+model InventoryLocation {
+  id            String   @id @default(uuid())
+  name          String
+  code          String   @unique
+  warehouseName String
+  aisle         String?
+  shelf         String?
+  bin           String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  balances      InventoryBalance[]
+  movements     InventoryMovement[]
+  batches       InventoryBatch[]
+
+  @@index([code])
+}
+
+model InventoryBalance {
+  id             String             @id @default(uuid())
+  productId      String
+  product        Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId      String?
+  variant        ProductVariant?    @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  locationId     String
+  location       InventoryLocation  @relation(fields: [locationId], references: [id])
+  currentStock   Int                @default(0)
+  reservedStock  Int                @default(0)
+  availableStock Int                @default(0)
+  minStock       Int                @default(10)
+  maxStock       Int?
+  reorderQty     Int                @default(50)
+  updatedAt      DateTime           @updatedAt
+
+  @@unique([productId, locationId, variantId])
+  @@index([productId])
+  @@index([locationId])
+}
+
+model InventoryBatch {
+  id             String             @id @default(uuid())
+  productId      String
+  product        Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId      String?
+  variant        ProductVariant?    @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  locationId     String?
+  location       InventoryLocation? @relation(fields: [locationId], references: [id])
+  batchNumber    String
+  lotNumber      String?
+  manufacturedAt DateTime?
+  expiresAt      DateTime?
+  initialQty     Int
+  remainingQty   Int
+  status         String             @default("ACTIVE") // ACTIVE, EXPIRED, QUARANTINED
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  movements      InventoryMovement[]
+
+  @@index([productId])
+  @@index([batchNumber])
+  @@index([expiresAt])
+}
+
+model InventoryMovement {
+  id              String             @id @default(uuid())
+  productId       String
+  product         Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId       String?
+  variant        ProductVariant?    @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  locationId      String
+  location        InventoryLocation  @relation(fields: [locationId], references: [id])
+  batchId         String?
+  batch           InventoryBatch?    @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  movementType    MovementType
+  quantity        Int
+  previousStock   Int
+  newStock        Int
+  mandatoryReason String             // Required for adjustments, damages, returns
+  referencePoId   String?
+  createdById     String?
+  createdBy       User?              @relation(fields: [createdById], references: [id])
+  createdAt       DateTime           @default(now())
+
+  @@index([productId])
+  @@index([locationId])
+  @@index([movementType])
+  @@index([createdAt])
+}
+
+model Supplier {
+  id            String            @id @default(uuid())
+  name          String
+  code          String            @unique
+  contactPerson String?
+  email         String?
+  phone         String?
+  leadTimeDays  Int               @default(7)
+  country       String?
+  notes         String?
+  isActive      Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  supplierProducts SupplierProduct[]
+  purchaseOrders   PurchaseOrder[]
+
+  @@index([code])
+}
+
+model SupplierProduct {
+  id            String   @id @default(uuid())
+  supplierId    String
+  supplier      Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supplierSku   String?
+  purchasePrice Decimal  @default(0.00) @db.Decimal(12, 2)
+  costCurrency  String   @default("INR")
+  minOrderQty   Int      @default(1)
+  updatedAt     DateTime @updatedAt
+
+  @@unique([supplierId, productId])
+  @@index([supplierId])
+  @@index([productId])
+}
+
+model PurchaseOrder {
+  id                   String              @id @default(uuid())
+  poNumber             String              @unique
+  supplierId           String
+  supplier             Supplier            @relation(fields: [supplierId], references: [id])
+  status               PurchaseOrderStatus @default(DRAFT)
+  orderDate            DateTime            @default(now())
+  expectedDeliveryDate DateTime?
+  notes                String?
+  totalEstimatedCost   Decimal             @default(0.00) @db.Decimal(12, 2)
+  createdById          String?
+  createdBy            User?               @relation(fields: [createdById], references: [id])
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  items                PurchaseOrderItem[]
+
+  @@index([poNumber])
+  @@index([status])
+}
+
+model PurchaseOrderItem {
+  id                 String          @id @default(uuid())
+  purchaseOrderId    String
+  purchaseOrder      PurchaseOrder   @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  productId          String
+  product            Product         @relation(fields: [productId], references: [id])
+  variantId          String?
+  variant            ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  quantityOrdered    Int
+  quantityReceived   Int             @default(0)
+  unitPrice          Decimal         @db.Decimal(12, 2)
+  costCurrency       String          @default("INR")
+
+  @@index([purchaseOrderId])
+  @@index([productId])
+}
+
+// -------------------------------------------------------------
+// 5. Pricing, Indicative Rates & External Sellers
+// -------------------------------------------------------------
+
+model PrivatePriceRecord {
+  id            String    @id @default(uuid())
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  purchasePrice Decimal   @db.Decimal(12, 2)
+  wholesalePrice Decimal? @db.Decimal(12, 2)
+  costCurrency  String    @default("INR")
+  taxPercentage Decimal   @default(18.00) @db.Decimal(5, 2)
+  landedCost    Decimal?  @db.Decimal(12, 2)
+  effectiveFrom DateTime  @default(now())
+  effectiveTo   DateTime?
+  createdById   String?
+  createdAt     DateTime  @default(now())
+
+  @@index([productId])
+}
+
+model PublicPriceRecord {
+  id                 String    @id @default(uuid())
+  productId          String
+  product            Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  indicativePrice    Decimal   @db.Decimal(12, 2)
+  displayCurrency    String    @default("INR")
+  isPubliclyVisible  Boolean   @default(false)
+  priceSource        String?   // Reference only
+  lastVerifiedAt     DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([productId])
+}
+
+model ExternalPurchaseLink {
+  id                  String    @id @default(uuid())
+  productId           String
+  product             Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sellerName          String    // e.g., "Industrial Safety Mart", "Authorized Distributor"
+  externalUrl         String    // Must match domain allowlist
+  destinationCountry  String    @default("IN")
+  currency            String    @default("INR")
+  priceAmount         Decimal?  @db.Decimal(12, 2)
+  lastCheckedAt       DateTime  @default(now())
+  affiliateDisclosure String?
+  isAllowed           Boolean   @default(true)
+  isActive            Boolean   @default(true)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([productId])
+  @@index([isAllowed])
+}
+
+model ExchangeRate {
+  id           String   @id @default(uuid())
+  fromCurrency String   // ISO 4217, e.g. "INR"
+  toCurrency   String   // e.g. "USD", "EUR", "GBP", "AED"
+  rate         Decimal  @db.Decimal(14, 6)
+  provider     String   @default("Static Table / Safe FreeForex Adapter")
+  lastFetchedAt DateTime @default(now())
+
+  @@unique([fromCurrency, toCurrency])
+  @@index([fromCurrency])
+}
+
+// -------------------------------------------------------------
+// 6. Reviews, Ratings & Moderation
+// -------------------------------------------------------------
+
+model Review {
+  id                     String         @id @default(uuid())
+  productId              String
+  product                Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId                 String
+  user                   User           @relation(fields: [userId], references: [id])
+  overallRating          Int            // 1 to 5
+  title                  String
+  content                String
+  pros                   String?
+  cons                   String?
+  useCaseContext         String?
+  variantUsed            String?
+  isPurchaseVerified     Boolean        @default(false)
+  dateOfUse              DateTime?
+  status                 ReviewStatus   @default(PENDING) // Moderation required
+  rejectionReason        String?
+  helpfulVotesCount      Int            @default(0)
+  unhelpfulVotesCount    Int            @default(0)
+  originalContentHistory String?        // Preservation for audit
+  moderatedById          String?
+  moderatedAt            DateTime?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+
+  ratings                ReviewRating[]
+  votes                  ReviewVote[]
+  reports                ReviewReport[]
+
+  @@index([productId])
+  @@index([userId])
+  @@index([status])
+}
+
+model ReviewRating {
+  id        String   @id @default(uuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  dimension String   // QUALITY, COMFORT_USABILITY, DURABILITY, VALUE_FOR_MONEY, PACKAGING, EFFECTIVENESS
+  rating    Int      // 1 to 5
+
+  @@index([reviewId])
+}
+
+model ReviewVote {
+  id        String   @id @default(uuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  ipAddress String?
+  isHelpful Boolean
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, ipAddress])
+  @@index([reviewId])
+}
+
+model ReviewReport {
+  id           String   @id @default(uuid())
+  reviewId     String
+  review       Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reportedById String?
+  ipAddress    String?
+  reason       String
+  details      String?
+  status       String   @default("PENDING") // PENDING, INVESTIGATED, DISMISSED, ACTION_TAKEN
+  createdAt    DateTime @default(now())
+
+  @@index([reviewId])
+  @@index([status])
+}
+
+model ProductQuestion {
+  id         String          @id @default(uuid())
+  productId  String
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  askedById  String?
+  askedBy    User?           @relation(fields: [askedById], references: [id])
+  question   String
+  status     String          @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt  DateTime        @default(now())
+
+  answers    ProductAnswer[]
+
+  @@index([productId])
+}
+
+model ProductAnswer {
+  id           String          @id @default(uuid())
+  questionId   String
+  question     ProductQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answeredById String
+  answeredBy   User            @relation(fields: [answeredById], references: [id])
+  answer       String
+  isStaff      Boolean         @default(false)
+  status       String          @default("APPROVED")
+  createdAt    DateTime        @default(now())
+
+  @@index([questionId])
+}
+
+// -------------------------------------------------------------
+// 7. Auditing, Security, Verification & System Settings
+// -------------------------------------------------------------
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userEmail     String?
+  ipAddress     String?
+  userAgent     String?
+  action        String   // CREATE, UPDATE, DELETE, STOCK_ADJUST, APPROVE_REVIEW, REJECT_REVIEW, EXPORT, ROLE_CHANGE
+  entity        String   // Product, InventoryMovement, Review, SystemSetting, etc.
+  entityId      String?
+  oldValuesJson String?  // Diff storage
+  newValuesJson String?  // Diff storage
+  reason        String?
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model VerificationSource {
+  id              String   @id @default(uuid())
+  sourceName      String
+  sourceUrl       String?
+  confidenceLevel String   @default("UNVERIFIED")
+  notes           String?
+  createdAt       DateTime @default(now())
+}
+
+model VerificationTask {
+  id          String    @id @default(uuid())
+  entityType  String    // Product, Document, Supplier
+  entityId    String
+  taskType    String    // VERIFY_SDS, VERIFY_STANDARDS, VERIFY_INGREDIENTS
+  assignedToId String?
+  assignedTo  User?     @relation(fields: [assignedToId], references: [id])
+  priority    String    @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  status      String    @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CANCELLED
+  notes       String?
+  createdAt   DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  @@index([status])
+  @@index([priority])
+}
+
+model AiEnrichmentJob {
+  id                 String   @id @default(uuid())
+  productId          String
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  promptType         String   // SUGGEST_SYNONYMS, DRAFT_SUMMARY, EXTRACT_SPECS
+  rawAiResponse      String?
+  extractedDraftJson String?
+  status             String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  isApprovedByOwner  Boolean  @default(false)     // Strict owner gate
+  createdAt          DateTime @default(now())
+
+  @@index([productId])
+  @@index([status])
+}
+
+model ImportJob {
+  id               String   @id @default(uuid())
+  fileName         String
+  importType       String   // PRODUCTS, INVENTORY, SUPPLIERS
+  status           String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED, ROLLED_BACK
+  totalRows        Int      @default(0)
+  processedRows    Int      @default(0)
+  successRows      Int      @default(0)
+  errorCount       Int      @default(0)
+  errorDetailsJson String?
+  createdById      String?
+  createdAt        DateTime @default(now())
+}
+
+model SystemSetting {
+  id          String   @id @default(uuid())
+  settingKey  String   @unique
+  value       String
+  isEncrypted Boolean  @default(false)
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@index([settingKey])
+}
+
+model FeatureFlag {
+  id          String   @id @default(uuid())
+  flagName    String   @unique
+  isEnabled   Boolean  @default(false)
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@index([flagName])
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetRole RoleType?
+  title      String
+  message    String
+  type       String   @default("INFO") // INFO, WARNING, SUCCESS, ALERT
+  isRead     Boolean  @default(false)
+  linkUrl    String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([targetRole])
+  @@index([isRead])
+}

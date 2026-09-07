@@ -1,0 +1,4 @@
+sku,location_code,quantity_change,movement_type,mandatory_reason
+"VS-PPE-001","WH-MAIN-01",50,"STOCK_IN","Routine supplier replenishment batch 4401"
+"VS-PPE-005","WH-MAIN-01",-10,"DAMAGE","Carton crushed in transit by forklift"
+"VS-CHM-011","WH-CHEM-02",100,"STOCK_IN","Receiving approved chemical order from manufacturer"

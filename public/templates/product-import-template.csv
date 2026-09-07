@@ -1,0 +1,3 @@
+name,sku,category_slug,unit_of_measure,status,short_description,is_ppe,is_chemical,protection_type,material,active_ingredients,hazard_class,indicative_price_inr
+"Nitrile Gloves Sample","VS-SAMPLE-01","gloves","box","DRAFT","Sample protective gloves for testing","true","false","Biological barrier","Nitrile","Requires manufacturer SDS/label verification","Requires manufacturer SDS/label verification",450.00
+"Caustic Soda Flakes","VS-SAMPLE-02","cleaning-chemicals","kilogram","DRAFT","Industrial Sodium Hydroxide flakes","false","true","","","Requires manufacturer SDS/label verification","Requires manufacturer SDS/label verification",85.00

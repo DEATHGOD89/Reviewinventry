@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info:
+  title: VeriSpec Product Inventory & Trusted Reviews API
+  version: 1.0.0
+  description: API specifications for VeriSpec product inventory intelligence and review platform.
+paths:
+  /api/health:
+    get:
+      summary: Health check telemetry
+      responses:
+        '200':
+          description: System health status
+  /api/auth/login:
+    post:
+      summary: Authenticate user credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200': { description: Login successful }
+        '401': { description: Invalid credentials }
+  /api/auth/logout:
+    post:
+      summary: Terminate session
+      responses:
+        '200': { description: Logged out }

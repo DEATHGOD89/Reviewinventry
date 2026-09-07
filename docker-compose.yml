@@ -1,0 +1,64 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: verispec-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: inventry_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d inventry_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache & Rate Limiter
+  redis:
+    image: redis:7-alpine
+    container_name: verispec-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Next.js Application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: verispec-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgrespassword@postgres:5432/inventry_db?schema=public
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SECRET=super-secret-auth-key-minimum-32-chars-change-in-production-123456789
+      - NEXTAUTH_URL=http://localhost:3000
+      - INITIAL_OWNER_EMAIL=owner@verispec.local
+      - INITIAL_OWNER_PASSWORD=ChangeMeOnFirstLogin2026!
+      - INITIAL_OWNER_NAME=System Owner
+      - DEFAULT_CURRENCY=INR
+      - STORAGE_PROVIDER=local
+      - AI_PROVIDER_ENABLED=false
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
