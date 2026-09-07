@@ -27,7 +27,7 @@ export interface WebhookConfig {
 
 let activeWebhookConfig: WebhookConfig = {
   channel: "SLACK",
-  endpointUrl: "",
+  endpointUrl: process.env.SLACK_WEBHOOK_URL || "",
   enabled: true,
 };
 
