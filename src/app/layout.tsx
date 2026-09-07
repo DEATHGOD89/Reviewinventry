@@ -10,6 +10,14 @@ export const metadata: Metadata = {
   description:
     "High-traffic inventory management, trusted product review, and safety compliance platform. 19 initial master products across PPE, chemicals, and waste containment.",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icon.png", sizes: "168x168", type: "image/png" },
+      { url: "/logo.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.png",
+    apple: "/apple-icon.png",
+  },
   keywords: [
     "industrial inventory",
     "PPE verification",

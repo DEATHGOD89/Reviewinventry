@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Shield, Lock, ArrowRight, UserCheck, AlertCircle } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -59,9 +60,7 @@ export default function LoginPage() {
     <div className="pt-32 pb-24 px-6 max-w-md mx-auto">
       <div className="rounded-3xl bg-white border border-zinc-200 shadow-xl p-8 space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-zinc-950 text-white flex items-center justify-center mx-auto shadow-md">
-            <Shield className="w-6 h-6 fill-white" />
-          </div>
+          <BrandLogo variant="dark" className="w-14 h-14 rounded-2xl mx-auto shadow-md" />
           <h1 className="text-2xl font-bold tracking-tight text-zinc-950">
             Portal Authentication
           </h1>

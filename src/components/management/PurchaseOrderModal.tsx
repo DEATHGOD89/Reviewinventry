@@ -15,6 +15,7 @@ import {
   Layers,
   ArrowRight,
 } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 interface PurchaseOrderModalProps {
   isOpen: boolean;
@@ -133,9 +134,7 @@ Authorized by: Operations Lead (manager@verispec.local)`;
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b-2 border-zinc-950 gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-md bg-zinc-950 text-white flex items-center justify-center font-bold text-xs">
-                  VS
-                </div>
+                <BrandLogo variant="dark" className="w-7 h-7 rounded-lg" />
                 <span className="font-black text-xl tracking-tight">VERISPEC INTEL</span>
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 uppercase font-mono">
                   Autonomous Procurement

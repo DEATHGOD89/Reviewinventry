@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Shield, Search, SlidersHorizontal, User, Menu, X, ArrowUpRight, ArrowRight, Package, ChevronDown, Lock, Settings } from "lucide-react";
 import { getAllDynamicProducts } from "@/lib/services/products-crud";
 import { ProductItem } from "@/lib/catalog-data";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
@@ -56,11 +57,9 @@ export const Navbar: React.FC = () => {
           {/* Brand Logo - Visora style */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white/85 backdrop-blur-md border border-zinc-200 shadow-xs hover:border-zinc-300 transition-all"
+            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white/85 backdrop-blur-md border border-zinc-200 shadow-xs hover:border-zinc-300 transition-all group"
           >
-            <div className="w-6 h-6 rounded-full bg-zinc-900 flex items-center justify-center text-white">
-              <Shield className="w-3.5 h-3.5 fill-white" />
-            </div>
+            <BrandLogo variant="dark" className="w-6 h-6 rounded-lg group-hover:scale-105 transition-transform" />
             <span className="font-bold tracking-tight text-sm text-zinc-950">VERISPEC</span>
             <span className="text-[10px] tracking-wider uppercase px-1.5 py-0.5 rounded-md bg-zinc-100 text-zinc-600 font-semibold">
               INTEL

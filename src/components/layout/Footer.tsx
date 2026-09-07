@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Shield, ExternalLink, FileText, CheckCircle2, Lock } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 export const Footer: React.FC = () => {
   return (
@@ -17,9 +18,7 @@ export const Footer: React.FC = () => {
           {/* Brand Col */}
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-2.5 text-white">
-              <div className="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-950">
-                <Shield className="w-4 h-4 fill-zinc-950" />
-              </div>
+              <BrandLogo variant="light" className="w-7 h-7 rounded-xl" />
               <span className="font-bold tracking-tight text-lg">VERISPEC INTEL</span>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed max-w-sm">

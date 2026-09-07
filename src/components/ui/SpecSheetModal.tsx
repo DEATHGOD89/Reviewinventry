@@ -14,6 +14,7 @@ import {
   Building2,
   CheckCircle2,
 } from "lucide-react";
+import { BrandLogo } from "./BrandLogo";
 
 interface SpecSheetModalProps {
   product: ProductItem;
@@ -81,9 +82,7 @@ export const SpecSheetModal: React.FC<SpecSheetModalProps> = ({
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b-2 border-zinc-900 gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 rounded-md bg-zinc-950 text-white flex items-center justify-center text-xs font-bold">
-                  VS
-                </div>
+                <BrandLogo variant="dark" className="w-6 h-6 rounded-md" />
                 <span className="font-extrabold tracking-tight text-lg text-zinc-950">
                   VERISPEC INTEL
                 </span>
