@@ -43,6 +43,15 @@ function CompareContent() {
     .map((s) => allProducts.find((p) => p.slug === s))
     .filter((p): p is ProductItem => p !== undefined);
 
+  // Extract all unique custom specification attributes across currently compared products
+  const allCustomSpecKeys = Array.from(
+    new Set(
+      selectedProducts.flatMap((p) =>
+        (p.customAttributes || []).map((attr) => attr.key.trim())
+      )
+    )
+  ).filter(Boolean);
+
   const addProduct = (slug: string) => {
     if (selectedSlugs.length < 4 && !selectedSlugs.includes(slug)) {
       setSelectedSlugs([...selectedSlugs, slug]);
@@ -51,6 +60,10 @@ function CompareContent() {
 
   const removeProduct = (slug: string) => {
     setSelectedSlugs(selectedSlugs.filter((s) => s !== slug));
+  };
+
+  const clearAll = () => {
+    setSelectedSlugs([]);
   };
 
   return (
@@ -90,6 +103,14 @@ function CompareContent() {
         <span className="text-[11px] text-zinc-400 font-mono">
           ({selectedSlugs.length}/4 Selected)
         </span>
+        {selectedSlugs.length > 0 && (
+          <button
+            onClick={clearAll}
+            className="text-[11px] px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-semibold transition-colors"
+          >
+            Clear All
+          </button>
+        )}
       </div>
 
       {/* Comparison Table */}
@@ -200,6 +221,25 @@ function CompareContent() {
                   </td>
                 ))}
               </tr>
+
+              {/* Dynamic Custom Technical Specifications Rows */}
+              {allCustomSpecKeys.map((specKey) => (
+                <tr key={specKey}>
+                  <td className="p-4 font-semibold text-zinc-600 bg-zinc-50/50">
+                    {specKey}
+                  </td>
+                  {selectedProducts.map((p) => {
+                    const match = p.customAttributes?.find(
+                      (attr) => attr.key.trim().toLowerCase() === specKey.toLowerCase()
+                    );
+                    return (
+                      <td key={p.id} className="p-4 border-l border-zinc-200 text-zinc-800 font-mono">
+                        {match ? match.value : "—"}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
 
               <tr>
                 <td className="p-4 font-semibold text-zinc-600 bg-zinc-50/50">Detailed View</td>

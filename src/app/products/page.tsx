@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { INITIAL_CATEGORIES } from "@/lib/catalog-data";
+import { INITIAL_CATEGORIES, ProductItem } from "@/lib/catalog-data";
 import { getAllDynamicProducts } from "@/lib/services/products-crud";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
 import { CurrencySelector } from "@/components/ui/CurrencySelector";
@@ -14,8 +14,11 @@ export default function ProductCataloguePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedCurrency, setSelectedCurrency] = useState<string>("INR");
+  const [allProducts, setAllProducts] = useState<ProductItem[]>([]);
 
-  const allProducts = useMemo(() => getAllDynamicProducts(), []);
+  useEffect(() => {
+    setAllProducts(getAllDynamicProducts());
+  }, []);
 
   const filteredProducts = useMemo(() => {
     return allProducts.filter((p) => {

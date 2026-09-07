@@ -279,7 +279,8 @@ export async function createNewProduct(
 export async function updateProductDetails(
   productId: string,
   updates: Partial<ProductItem>,
-  userEmail: string
+  userEmail: string,
+  customReason?: string
 ): Promise<ProductItem> {
   const existing = dynamicProductsStore.get(productId);
   if (!existing) {
@@ -304,7 +305,7 @@ export async function updateProductDetails(
     entityId: productId,
     oldValues: { name: oldValues.name, status: oldValues.status, price: oldValues.indicativePriceInr },
     newValues: { name: updated.name, status: updated.status, price: updated.indicativePriceInr },
-    reason: `Product specification updated by ${userEmail}`,
+    reason: customReason || `Product specification updated by ${userEmail}`,
   });
 
   return updated;

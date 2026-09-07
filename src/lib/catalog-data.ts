@@ -31,6 +31,7 @@ export interface ProductItem {
   nextReviewAt?: string;
   isPubliclyVisible: boolean;
   indicativePriceInr: number;
+  customAttributes?: Array<{ key: string; value: string }>;
   ppeDetail?: {
     protectionType: string;
     intendedWorkplace: string;

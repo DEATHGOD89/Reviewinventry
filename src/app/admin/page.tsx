@@ -4,7 +4,11 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { getAuditLogs, AuditLogEntry } from "@/lib/audit";
 import { getAllSupportTickets, updateTicketStatus, SupportTicket } from "@/lib/services/support-tickets";
+import { getAllDynamicProducts, deleteProductRecord } from "@/lib/services/products-crud";
+import { ProductItem } from "@/lib/catalog-data";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import { VerificationBadge } from "@/components/ui/VerificationBadge";
+import { ProductEditModal } from "@/components/management/ProductEditModal";
 import {
   Shield,
   Lock,
@@ -21,16 +25,43 @@ import {
   BarChart3,
   Bot,
   Zap,
+  Edit2,
+  Trash2,
+  Plus,
+  Package,
 } from "lucide-react";
 
 export default function OwnerAdminPortalPage() {
   const [activeTab, setActiveTab] = useState<
-    "audit" | "analytics" | "users" | "tickets" | "integrations" | "settings"
+    "audit" | "products" | "analytics" | "users" | "tickets" | "integrations" | "settings"
   >("audit");
 
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(getAuditLogs());
   const [tickets, setTickets] = useState<SupportTicket[]>(getAllSupportTickets());
   const [filterAction, setFilterAction] = useState("all");
+
+  // Catalogue Master Products State
+  const [products, setProducts] = useState<ProductItem[]>(getAllDynamicProducts());
+  const [productSearch, setProductSearch] = useState("");
+  const [productModalOpen, setProductModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
+
+  const handleDeleteProduct = async (p: ProductItem) => {
+    const reason = prompt(
+      `Owner Authority: Confirm removal of "${p.name}" (${p.sku}).\nMandatory audit reason:`
+    );
+    if (!reason || reason.trim().length < 5) {
+      alert("Removal cancelled: A valid reason of at least 5 characters is required.");
+      return;
+    }
+    try {
+      await deleteProductRecord(p.id, "owner@verispec.local", reason);
+      setProducts(getAllDynamicProducts());
+      setAuditLogs(getAuditLogs());
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : String(err));
+    }
+  };
 
   // Users State
   const [users, setUsers] = useState([
@@ -165,6 +196,7 @@ export default function OwnerAdminPortalPage() {
       <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200 pb-2">
         {[
           { id: "audit", label: `Audit Logs (${auditLogs.length})` },
+          { id: "products", label: `Catalogue Master Management (${products.length})` },
           { id: "analytics", label: "Full Analytics & Reports" },
           { id: "tickets", label: `Support Tickets & AI Summaries (${tickets.length})` },
           { id: "users", label: `User Roles (${users.length})` },
@@ -254,6 +286,137 @@ export default function OwnerAdminPortalPage() {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Catalogue Master Management */}
+      {activeTab === "products" && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search products by SKU or name..."
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 rounded-full border border-zinc-200 bg-white text-xs"
+              />
+            </div>
+
+            <button
+              onClick={() => {
+                setEditingProduct(null);
+                setProductModalOpen(true);
+              }}
+              className="px-4 py-2 rounded-full bg-zinc-950 text-white text-xs font-semibold flex items-center gap-1.5 hover:bg-zinc-800 transition-all shadow-xs"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Stage New Master Product</span>
+            </button>
+          </div>
+
+          <div className="rounded-3xl bg-white border border-zinc-200 shadow-xs overflow-hidden">
+            <div className="p-5 border-b border-zinc-200 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-zinc-950">
+                  Catalogue Master Inventory Sheet ({products.length} Products)
+                </h3>
+                <p className="text-xs text-zinc-400">
+                  Owner-level specification editing, custom attributes, image updates, and stock allocation.
+                </p>
+              </div>
+              <span className="text-xs font-mono text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full font-bold">
+                Owner Direct Access
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left">
+                <thead>
+                  <tr className="bg-zinc-50 border-b border-zinc-200 font-bold text-zinc-600">
+                    <th className="p-3.5">SKU</th>
+                    <th className="p-3.5">Name</th>
+                    <th className="p-3.5">Category</th>
+                    <th className="p-3.5">Warehouse Bin</th>
+                    <th className="p-3.5">Current Stock</th>
+                    <th className="p-3.5">Indicative Price</th>
+                    <th className="p-3.5">Status</th>
+                    <th className="p-3.5 text-right">Owner Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100">
+                  {products
+                    .filter(
+                      (p) =>
+                        p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+                        p.sku.toLowerCase().includes(productSearch.toLowerCase())
+                    )
+                    .map((p) => (
+                      <tr key={p.id} className="hover:bg-zinc-50/80">
+                        <td className="p-3.5 font-mono font-bold text-zinc-700">{p.sku}</td>
+                        <td className="p-3.5 font-bold text-zinc-950">
+                          <div className="flex items-center gap-2.5">
+                            {p.imageUrl ? (
+                              <img
+                                src={p.imageUrl}
+                                alt={p.name}
+                                className="w-8 h-8 rounded-lg object-cover border border-zinc-200 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-xs shrink-0">
+                                📦
+                              </div>
+                            )}
+                            <span>{p.name}</span>
+                          </div>
+                        </td>
+                        <td className="p-3.5 text-zinc-600">{p.categoryName}</td>
+                        <td className="p-3.5 font-mono text-zinc-500">
+                          {p.inventory?.locationCode || "WH-MAIN-01"}
+                        </td>
+                        <td className="p-3.5 font-mono text-zinc-800 font-bold">
+                          {p.inventory?.currentStock ?? 0} {p.unitOfMeasure}s
+                        </td>
+                        <td className="p-3.5 font-bold text-zinc-900">
+                          ₹{p.indicativePriceInr?.toFixed(2)}
+                        </td>
+                        <td className="p-3.5">
+                          <VerificationBadge status={p.status} confidence={p.dataConfidenceLevel} />
+                        </td>
+                        <td className="p-3.5 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Link
+                              href={`/products/${p.slug}`}
+                              className="px-2.5 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-[11px] font-semibold"
+                            >
+                              View
+                            </Link>
+                            <button
+                              onClick={() => {
+                                setEditingProduct(p);
+                                setProductModalOpen(true);
+                              }}
+                              className="p-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors"
+                              title="Edit product specifications"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(p)}
+                              className="p-1.5 rounded-full bg-red-50 hover:bg-red-100 text-red-600 transition-colors"
+                              title="Delete product"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -602,6 +765,18 @@ export default function OwnerAdminPortalPage() {
           </div>
         </div>
       )}
+
+      {/* Owner Product Edit & Creation Modal */}
+      <ProductEditModal
+        isOpen={productModalOpen}
+        onClose={() => setProductModalOpen(false)}
+        onSaved={(updated) => {
+          setProducts(updated);
+          setAuditLogs(getAuditLogs());
+        }}
+        productToEdit={editingProduct}
+        currentUserEmail="owner@verispec.local"
+      />
     </div>
   );
 }

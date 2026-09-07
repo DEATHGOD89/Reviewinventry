@@ -30,6 +30,7 @@ import { VerificationBadge, AuditorBadge } from "@/components/ui/VerificationBad
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { WarehouseLabelModal } from "@/components/ui/WarehouseLabelModal";
 import { BarcodeScannerModal } from "@/components/ui/BarcodeScannerModal";
+import { ProductEditModal } from "@/components/management/ProductEditModal";
 import {
   getActiveStockAlerts,
   testDispatchWebhook,
@@ -97,13 +98,6 @@ export default function ManagementPortalPage() {
   // Add / Edit Product Modal State
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
-  const [formName, setFormName] = useState("");
-  const [formSku, setFormSku] = useState("");
-  const [formCategory, setFormCategory] = useState("Head and Face Protection");
-  const [formUom, setFormUom] = useState("piece");
-  const [formStatus, setFormStatus] = useState<ProductItem["status"]>("DRAFT");
-  const [formPrice, setFormPrice] = useState(150);
-  const [formDesc, setFormDesc] = useState("");
 
   // Review Rejection Reason State
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -168,64 +162,12 @@ export default function ManagementPortalPage() {
 
   const openNewProductModal = () => {
     setEditingProduct(null);
-    setFormName("");
-    setFormSku("");
-    setFormCategory("Head and Face Protection");
-    setFormUom("piece");
-    setFormStatus("DRAFT");
-    setFormPrice(250);
-    setFormDesc("");
     setProductModalOpen(true);
   };
 
   const openEditProductModal = (p: ProductItem) => {
     setEditingProduct(p);
-    setFormName(p.name);
-    setFormSku(p.sku);
-    setFormCategory(p.categoryName);
-    setFormUom(p.unitOfMeasure);
-    setFormStatus(p.status);
-    setFormPrice(p.indicativePriceInr);
-    setFormDesc(p.shortDescription);
     setProductModalOpen(true);
-  };
-
-  const handleProductSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (editingProduct) {
-        await updateProductDetails(
-          editingProduct.id,
-          {
-            name: formName,
-            sku: formSku,
-            categoryName: formCategory,
-            unitOfMeasure: formUom,
-            status: formStatus,
-            indicativePriceInr: formPrice,
-            shortDescription: formDesc,
-          },
-          "manager@verispec.local"
-        );
-      } else {
-        await createNewProduct(
-          {
-            name: formName,
-            sku: formSku,
-            categoryName: formCategory,
-            unitOfMeasure: formUom,
-            status: formStatus,
-            indicativePriceInr: formPrice,
-            shortDescription: formDesc,
-          },
-          "manager@verispec.local"
-        );
-      }
-      setProducts(getAllDynamicProducts());
-      setProductModalOpen(false);
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : String(err));
-    }
   };
 
   const handleDeleteProduct = async (p: ProductItem) => {
@@ -1093,130 +1035,13 @@ export default function ManagementPortalPage() {
       )}
 
       {/* Add / Edit Product Modal */}
-      {productModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full border border-zinc-200 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h3 className="text-base font-bold text-zinc-950 mb-1">
-              {editingProduct ? `Edit ${editingProduct.name}` : "Stage New Master Product"}
-            </h3>
-            <p className="text-xs text-zinc-500 mb-4">
-              All modifications are recorded in the immutable audit log.
-            </p>
-
-            <form onSubmit={handleProductSave} className="space-y-3 text-xs">
-              <div>
-                <label className="block text-zinc-700 font-semibold mb-1">Product Name</label>
-                <input
-                  type="text"
-                  required
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-zinc-200"
-                />
-              </div>
-
-              <div>
-                <label className="block text-zinc-700 font-semibold mb-1">SKU</label>
-                <input
-                  type="text"
-                  required
-                  value={formSku}
-                  onChange={(e) => setFormSku(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-zinc-200 font-mono"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-zinc-700 font-semibold mb-1">Category</label>
-                  <select
-                    value={formCategory}
-                    onChange={(e) => setFormCategory(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-zinc-200 bg-white"
-                  >
-                    <option value="Personal Protective Equipment (PPE)">Personal Protective Equipment</option>
-                    <option value="Gloves">Gloves</option>
-                    <option value="Foot Protection">Foot Protection</option>
-                    <option value="Protective Clothing">Protective Clothing</option>
-                    <option value="Head and Face Protection">Head and Face Protection</option>
-                    <option value="Cleaning Chemicals">Cleaning Chemicals</option>
-                    <option value="Hygiene and Sanitization">Hygiene and Sanitization</option>
-                    <option value="Waste Management">Waste Management</option>
-                    <option value="Industrial Supplies">Industrial Supplies</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-zinc-700 font-semibold mb-1">Unit of Measure (UOM)</label>
-                  <input
-                    type="text"
-                    required
-                    value={formUom}
-                    onChange={(e) => setFormUom(e.target.value)}
-                    placeholder="piece, pair, box, litre, etc."
-                    className="w-full p-2.5 rounded-xl border border-zinc-200"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-zinc-700 font-semibold mb-1">Indicative Price (INR)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    step="0.01"
-                    required
-                    value={formPrice}
-                    onChange={(e) => setFormPrice(Number(e.target.value))}
-                    className="w-full p-2.5 rounded-xl border border-zinc-200"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-zinc-700 font-semibold mb-1">Verification Status</label>
-                  <select
-                    value={formStatus}
-                    onChange={(e) => setFormStatus(e.target.value as ProductItem["status"])}
-                    className="w-full p-2.5 rounded-xl border border-zinc-200 bg-white"
-                  >
-                    <option value="DRAFT">DRAFT (Unverified)</option>
-                    <option value="PENDING_VERIFICATION">PENDING_VERIFICATION</option>
-                    <option value="ACTIVE">ACTIVE</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-zinc-700 font-semibold mb-1">Short Description</label>
-                <textarea
-                  rows={2}
-                  required
-                  value={formDesc}
-                  onChange={(e) => setFormDesc(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-zinc-200"
-                />
-              </div>
-
-              <div className="pt-2 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setProductModalOpen(false)}
-                  className="px-4 py-2 rounded-full bg-zinc-100 text-zinc-700 font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-full bg-zinc-950 text-white font-semibold"
-                >
-                  {editingProduct ? "Save Changes" : "Stage Product"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <ProductEditModal
+        isOpen={productModalOpen}
+        onClose={() => setProductModalOpen(false)}
+        onSaved={(updatedList) => setProducts(updatedList)}
+        productToEdit={editingProduct}
+        currentUserEmail="manager@verispec.local"
+      />
 
       {/* Transcript Viewer Modal */}
       {viewingTicket && (

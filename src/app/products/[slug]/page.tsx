@@ -28,21 +28,25 @@ import {
   Camera,
   RotateCw,
   QrCode,
+  Edit2,
 } from "lucide-react";
 import { WarehouseLabelModal } from "@/components/ui/WarehouseLabelModal";
 import { SdsDocumentViewer } from "@/components/ui/SdsDocumentViewer";
+import { ProductEditModal } from "@/components/management/ProductEditModal";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
 
-  const product: ProductItem | undefined =
+  const initialProduct =
     getDynamicProductBySlug(slug) || INITIAL_19_PRODUCTS.find((p) => p.slug === slug);
+  const [product, setProduct] = useState<ProductItem | undefined>(initialProduct);
 
   const [selectedCurrency, setSelectedCurrency] = useState<string>("INR");
   const [activeMediaView, setActiveMediaView] = useState<"photo" | "360">("photo");
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number>(0);
   const [labelModalOpen, setLabelModalOpen] = useState<boolean>(false);
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
   const [reportModalOpen, setReportModalOpen] = useState<boolean>(false);
   const [reportSubmitted, setReportSubmitted] = useState<boolean>(false);
   const [reportReason, setReportReason] = useState<string>("");
@@ -118,21 +122,35 @@ export default function ProductDetailPage() {
           <span className="text-zinc-900 font-semibold">{product.name}</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           <VerificationBadge status={product.status} confidence={product.dataConfidenceLevel} />
+          <Link
+            href={`/compare?p1=${product.slug}`}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition-colors"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-700" />
+            <span>Compare</span>
+          </Link>
           <button
             onClick={() => setLabelModalOpen(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition-colors"
           >
             <QrCode className="w-3.5 h-3.5" />
-            <span>Print Bin & Rack Label</span>
+            <span>Print Bin Label</span>
+          </button>
+          <button
+            onClick={() => setEditModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold transition-colors shadow-xs"
+          >
+            <Edit2 className="w-3.5 h-3.5" />
+            <span>Edit Specifications</span>
           </button>
           <button
             onClick={() => setReportModalOpen(true)}
             className="inline-flex items-center gap-1 text-[11px] text-zinc-500 hover:text-zinc-900 underline underline-offset-4"
           >
             <Flag className="w-3 h-3" />
-            <span>Report inaccurate info</span>
+            <span>Report</span>
           </button>
         </div>
       </div>
@@ -332,6 +350,24 @@ export default function ProductDetailPage() {
                     <span className="text-zinc-400 block text-[10px]">First Aid Reference</span>
                     <strong className="text-zinc-800">{product.chemicalDetail.firstAidReference}</strong>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Dynamic Custom Technical Specifications Section */}
+            {product.customAttributes && product.customAttributes.length > 0 && (
+              <div className="p-6 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3">
+                <div className="flex items-center gap-2 text-zinc-900 font-bold text-sm">
+                  <SlidersHorizontal className="w-4 h-4 text-zinc-700" />
+                  <span>Custom Engineering & Verified Technical Attributes</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  {product.customAttributes.map((attr, idx) => (
+                    <div key={idx} className="p-3 bg-white rounded-xl border border-zinc-200">
+                      <span className="text-zinc-400 block text-[10px] font-medium">{attr.key}</span>
+                      <strong className="text-zinc-900 font-mono text-xs">{attr.value}</strong>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -681,6 +717,18 @@ export default function ProductDetailPage() {
         product={product}
         isOpen={labelModalOpen}
         onClose={() => setLabelModalOpen(false)}
+      />
+
+      {/* Product Edit Modal for Staff / Owner */}
+      <ProductEditModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSaved={(updated) => {
+          const fresh = updated.find((p) => p.slug === slug || p.id === product.id);
+          if (fresh) setProduct(fresh);
+        }}
+        productToEdit={product}
+        currentUserEmail="manager@verispec.local"
       />
     </div>
   );
