@@ -5,9 +5,11 @@ import Link from "next/link";
 import { INITIAL_CATEGORIES, ProductItem } from "@/lib/catalog-data";
 import { getAllDynamicProducts } from "@/lib/services/products-crud";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
+import { TrustScoreBadge } from "@/components/ui/TrustScoreBadge";
 import { CurrencySelector } from "@/components/ui/CurrencySelector";
 import { convertFromInr } from "@/lib/services/currency";
-import { Search, Filter, SlidersHorizontal, ArrowRight, ShieldCheck, AlertTriangle, ExternalLink } from "lucide-react";
+import { ProductFinderWizard } from "@/components/discovery/ProductFinderWizard";
+import { Search, Filter, SlidersHorizontal, ArrowRight, ShieldCheck, AlertTriangle, ExternalLink, Compass } from "lucide-react";
 
 export default function ProductCataloguePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,6 +17,7 @@ export default function ProductCataloguePage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedCurrency, setSelectedCurrency] = useState<string>("INR");
   const [allProducts, setAllProducts] = useState<ProductItem[]>([]);
+  const [showWizard, setShowWizard] = useState<boolean>(false);
 
   useEffect(() => {
     setAllProducts(getAllDynamicProducts());
@@ -61,15 +64,37 @@ export default function ProductCataloguePage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-zinc-500 font-medium">Display Currency:</span>
-            <CurrencySelector
-              currentCurrency={selectedCurrency}
-              onCurrencyChange={setSelectedCurrency}
-            />
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowWizard(!showWizard)}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all shadow-xs ${
+                showWizard
+                  ? "bg-emerald-600 text-white"
+                  : "bg-zinc-950 text-white hover:bg-zinc-800"
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5 text-emerald-300" />
+              <span>{showWizard ? "Hide Guided Wizard" : "Product Finder Wizard"}</span>
+            </button>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-500 font-medium hidden sm:inline">Currency:</span>
+              <CurrencySelector
+                currentCurrency={selectedCurrency}
+                onCurrencyChange={setSelectedCurrency}
+              />
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Guided Product Finder Wizard */}
+      {showWizard && (
+        <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-200">
+          <ProductFinderWizard />
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -167,7 +192,10 @@ export default function ProductCataloguePage() {
                   <h3 className="text-xl font-bold text-zinc-950 tracking-tight group-hover:text-cyan-900 transition-colors">
                     {p.name}
                   </h3>
-                  <div className="text-xs text-zinc-400 mt-0.5 font-medium">{p.categoryName}</div>
+                  <div className="flex items-center justify-between gap-2 mt-1 mb-2">
+                    <span className="text-xs text-zinc-400 font-medium">{p.categoryName}</span>
+                    <TrustScoreBadge product={p} size="sm" />
+                  </div>
 
                   <p className="text-xs text-zinc-600 leading-relaxed mt-3 line-clamp-2">
                     {p.shortDescription}

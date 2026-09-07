@@ -153,18 +153,22 @@ export const HeroShowcase: React.FC = () => {
       <div className="max-w-6xl mx-auto text-center mb-10">
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-zinc-900 text-white text-xs font-semibold mb-5 shadow-sm border border-zinc-700">
           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="tracking-wide">VERISPEC INDUSTRIAL SAFETY & HAZARDOUS INVENTORY</span>
+          <span className="tracking-wide">VERIFIED SAFETY & PRODUCT INTELLIGENCE PLATFORM</span>
           <span className="hidden sm:inline text-zinc-400">&bull;</span>
-          <span className="hidden sm:inline text-zinc-300 font-mono text-[11px]">ISO 45001 & OSHA 1910 AUDITED</span>
+          <span className="hidden sm:inline text-zinc-300 font-mono text-[11px]">ZERO FABRICATED CLAIMS</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-zinc-950 uppercase leading-[1.02] max-w-5xl mx-auto">
-          Industrial Safety &{" "}
-          <span className="text-zinc-400 block sm:inline font-bold">Inventory Intelligence</span>
+        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-zinc-950 uppercase leading-[0.98] max-w-5xl mx-auto">
+          Know Before{" "}
+          <span className="text-zinc-400 block sm:inline font-bold">You Use.</span>
         </h1>
 
-        <p className="mt-4 text-xs sm:text-sm md:text-base text-zinc-600 font-medium max-w-2xl mx-auto leading-relaxed">
-          The official non-store specification registry, warehouse stock telemetry, and certified safety auditor review platform. Tracking 19 initial master products across PPE, chemical hygiene, and hazardous waste with zero fabricated claims.
+        <p className="mt-4 text-sm sm:text-base md:text-lg text-zinc-800 font-semibold max-w-3xl mx-auto leading-relaxed">
+          &ldquo;Before you buy, use, store, or trust a product—know whether its information is verified.&rdquo;
+        </p>
+
+        <p className="mt-2 text-xs sm:text-sm text-zinc-500 max-w-2xl mx-auto leading-relaxed">
+          The unified specification registry, warehouse stock telemetry, and Digital Product Passport platform for consumers, factories, offices, hotels, hospitals, schools, cleaning crews & safety managers.
         </p>
 
         {/* Quick Navigation Pills */}

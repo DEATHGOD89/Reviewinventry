@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ProductItem } from "@/lib/catalog-data";
 import { getAllDynamicProducts } from "@/lib/services/products-crud";
 import { VerificationBadge } from "@/components/ui/VerificationBadge";
+import { TrustScoreBadge } from "@/components/ui/TrustScoreBadge";
 import { SlidersHorizontal, Plus, X, ArrowRight, ShieldCheck, AlertTriangle } from "lucide-react";
 
 export default function ProductComparePage() {
@@ -173,6 +174,22 @@ function CompareContent() {
                 {selectedProducts.map((p) => (
                   <td key={p.id} className="p-4 border-l border-zinc-200">
                     <VerificationBadge status={p.status} confidence={p.dataConfidenceLevel} />
+                  </td>
+                ))}
+              </tr>
+
+              <tr>
+                <td className="p-4 font-semibold text-zinc-600 bg-zinc-50/50">Trust Score™ (0-100)</td>
+                {selectedProducts.map((p) => (
+                  <td key={p.id} className="p-4 border-l border-zinc-200">
+                    {p.dataConfidenceLevel === "UNVERIFIED" ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-mono px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-500 border border-zinc-200 font-semibold">
+                        <AlertTriangle className="w-3 h-3 text-amber-500" />
+                        <span>Not verified yet</span>
+                      </span>
+                    ) : (
+                      <TrustScoreBadge product={p} size="sm" />
+                    )}
                   </td>
                 ))}
               </tr>

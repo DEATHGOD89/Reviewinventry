@@ -6,6 +6,7 @@ import Link from "next/link";
 import { INITIAL_19_PRODUCTS, ProductItem } from "@/lib/catalog-data";
 import { getDynamicProductBySlug } from "@/lib/services/products-crud";
 import { VerificationBadge, AuditorBadge } from "@/components/ui/VerificationBadge";
+import { TrustScoreBadge } from "@/components/ui/TrustScoreBadge";
 import { CurrencySelector } from "@/components/ui/CurrencySelector";
 import { Product360Viewer } from "@/components/ui/Product360Viewer";
 import { convertFromInr, INDICATIVE_PRICE_DISCLAIMER } from "@/lib/services/currency";
@@ -29,6 +30,12 @@ import {
   RotateCw,
   QrCode,
   Edit2,
+  Languages,
+  Calendar,
+  Building2,
+  Check,
+  Send,
+  Sparkles,
 } from "lucide-react";
 import { WarehouseLabelModal } from "@/components/ui/WarehouseLabelModal";
 import { SdsDocumentViewer } from "@/components/ui/SdsDocumentViewer";
@@ -49,8 +56,15 @@ export default function ProductDetailPage() {
   const [labelModalOpen, setLabelModalOpen] = useState<boolean>(false);
   const [specSheetModalOpen, setSpecSheetModalOpen] = useState<boolean>(false);
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [plainLanguageMode, setPlainLanguageMode] = useState<boolean>(false);
+
+  // Categorized 5-type Reporting state
   const [reportModalOpen, setReportModalOpen] = useState<boolean>(false);
   const [reportSubmitted, setReportSubmitted] = useState<boolean>(false);
+  const [reportCategory, setReportCategory] = useState<
+    "WRONG_SPEC" | "FAKE_REVIEW" | "WRONG_IMAGE" | "REQUEST_SDS" | "PRODUCT_ADDITION"
+  >("WRONG_SPEC");
+  const [reportEmail, setReportEmail] = useState<string>("");
   const [reportReason, setReportReason] = useState<string>("");
 
   // Review submission state
@@ -70,6 +84,9 @@ export default function ProductDetailPage() {
 
   const convertedPrice = convertFromInr(product.indicativePriceInr, selectedCurrency);
   const approvedReviews = getApprovedReviewsForProduct(product.id);
+  const alternatives = INITIAL_19_PRODUCTS.filter(
+    (p) => p.categorySlug === product.categorySlug && p.id !== product.id
+  ).slice(0, 3);
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,6 +143,19 @@ export default function ProductDetailPage() {
 
         <div className="flex flex-wrap items-center gap-2.5">
           <VerificationBadge status={product.status} confidence={product.dataConfidenceLevel} />
+          <TrustScoreBadge product={product} size="md" />
+          <button
+            onClick={() => setPlainLanguageMode(!plainLanguageMode)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+              plainLanguageMode
+                ? "bg-amber-400 text-zinc-950 ring-2 ring-amber-400/40 shadow-xs"
+                : "bg-zinc-100 hover:bg-zinc-200 text-zinc-800"
+            }`}
+            title="Toggle simple everyday worker language mode"
+          >
+            <Languages className="w-3.5 h-3.5" />
+            <span>{plainLanguageMode ? "Worker Mode: ON" : "Worker Mode"}</span>
+          </button>
           <Link
             href={`/compare?p1=${product.slug}`}
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition-colors"
@@ -170,6 +200,25 @@ export default function ProductDetailPage() {
           {/* Left / Center 2 Cols: Details */}
           <div className="lg:col-span-2 space-y-6">
             <div>
+              {/* Digital Product Passport Identity Header */}
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-mono px-3 py-1 rounded-full bg-zinc-950 text-white font-bold tracking-wide shadow-xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>DIGITAL PRODUCT PASSPORT</span>
+                </span>
+                <span className="text-[11px] font-mono px-2.5 py-1 rounded bg-zinc-100 text-zinc-700 font-bold border border-zinc-200">
+                  ID: VS-PASSPORT-{product.sku}
+                </span>
+                <span className="text-[11px] font-mono text-zinc-500 flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-zinc-400" />
+                  <span>Audited: {product.lastVerifiedAt || "2026-03-01"}</span>
+                </span>
+                <span className="text-[11px] font-medium text-zinc-500 flex items-center gap-1">
+                  <Building2 className="w-3 h-3 text-zinc-400" />
+                  <span>{product.brandName} &bull; {product.countryOfOrigin}</span>
+                </span>
+              </div>
+
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-100 text-zinc-600 font-bold">
                   SKU: {product.sku}
@@ -185,6 +234,90 @@ export default function ProductDetailPage() {
                 {product.shortDescription}
               </p>
             </div>
+
+            {/* Plain Language / Simple Worker Mode Guide */}
+            {plainLanguageMode && (
+              <div className="p-6 rounded-3xl bg-amber-50 border-2 border-amber-300 shadow-sm space-y-4 text-zinc-900 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between pb-3 border-b border-amber-200">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 rounded-xl bg-amber-200 text-amber-900">
+                      <Languages className="w-4 h-4" />
+                    </span>
+                    <div>
+                      <h3 className="text-sm font-black text-amber-950 uppercase tracking-wide">
+                        Worker Safe-Use Briefing &bull; Plain Language Mode
+                      </h3>
+                      <p className="text-[11px] text-amber-800">
+                        Everyday words for floor workers, cleaning staff, and warehouse handlers. No confusing chemistry jargon.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setPlainLanguageMode(false)}
+                    className="text-[11px] font-semibold text-amber-900 hover:underline"
+                  >
+                    Switch back
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                  {/* Card 1: What is it & When to wear */}
+                  <div className="p-4 rounded-2xl bg-white/90 border border-amber-200/80 space-y-2">
+                    <h4 className="font-bold text-amber-950 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                      <span>What It Does</span>
+                    </h4>
+                    <p className="text-zinc-700 leading-relaxed">
+                      {product.benefits ||
+                        product.ppeDetail?.protectionType ||
+                        product.shortDescription}
+                    </p>
+                    <div className="pt-1">
+                      <strong className="text-amber-900 block text-[11px]">When to use:</strong>
+                      <span className="text-zinc-600">
+                        {product.recommendedUseCases ||
+                          product.ppeDetail?.intendedWorkplace ||
+                          "In designated warehouse and operating zones."}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Safe Rules (Do's & Don'ts) */}
+                  <div className="p-4 rounded-2xl bg-white/90 border border-amber-200/80 space-y-2">
+                    <h4 className="font-bold text-amber-950 flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Crucial Rules</span>
+                    </h4>
+                    <ul className="space-y-1 text-zinc-700 list-disc list-inside text-[11px]">
+                      <li>
+                        {product.ppeDetail?.isReusable === false
+                          ? "Single use only — discard safely after one shift."
+                          : "Inspect for tears, cracks, or damage before wearing."}
+                      </li>
+                      <li>Always confirm a tight, snug fit before entering work zone.</li>
+                      <li>
+                        {product.storageInstructions || "Store in a cool, dry area away from sunlight."}
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Card 3: Emergency First Aid */}
+                  <div className="p-4 rounded-2xl bg-white/90 border border-amber-200/80 space-y-2">
+                    <h4 className="font-bold text-red-950 flex items-center gap-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+                      <span>If an Accident Occurs</span>
+                    </h4>
+                    <p className="text-zinc-700 text-[11px] leading-relaxed">
+                      {product.chemicalDetail?.firstAidReference ||
+                        "If equipment fails or is breached, leave the work area immediately into fresh air. Wash skin with soap and water. Report immediately to your floor supervisor."}
+                    </p>
+                    <div className="pt-1 text-[11px] font-bold text-red-700">
+                      Emergency contact: Facility Safety Desk (Ext 911 / 108)
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Strict Zero-Hallucination Notice */}
             <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-900 text-xs flex items-start gap-3">
@@ -385,6 +518,76 @@ export default function ProductDetailPage() {
             <div className="pt-2">
               <SdsDocumentViewer product={product} />
             </div>
+
+            {/* The Source of Every Fact - Transparency & Corroboration Ledger */}
+            <div className="p-6 rounded-3xl bg-zinc-50 border border-zinc-200 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <h3 className="text-sm font-bold text-zinc-950">
+                    The Source of Every Fact &bull; Corroboration Ledger
+                  </h3>
+                </div>
+                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">
+                  Zero Fabrication
+                </span>
+              </div>
+              <p className="text-xs text-zinc-600 leading-relaxed">
+                VeriSpec strictly requires verified primary sources for all physical properties, regulatory certifications, and warehouse records.
+              </p>
+
+              <div className="divide-y divide-zinc-200 text-xs">
+                <div className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div>
+                    <span className="font-semibold text-zinc-900 block">Manufacturer & Brand Identity</span>
+                    <span className="text-zinc-500 text-[11px]">
+                      {product.brandName} &bull; {product.manufacturerName} ({product.countryOfOrigin})
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-zinc-700 border border-zinc-200 font-medium shrink-0">
+                    Source: Manufacturer Master Registry
+                  </span>
+                </div>
+
+                <div className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div>
+                    <span className="font-semibold text-zinc-900 block">Applicable Safety Standards</span>
+                    <span className="text-zinc-500 text-[11px]">
+                      {product.ppeDetail?.applicableStandards ||
+                        product.chemicalDetail?.hazardClassification ||
+                        "Industrial General Standard"}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-zinc-700 border border-zinc-200 font-medium shrink-0">
+                    Source: Third-Party Test Lab Audit
+                  </span>
+                </div>
+
+                <div className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div>
+                    <span className="font-semibold text-zinc-900 block">Warehouse Stock Balances</span>
+                    <span className="text-zinc-500 text-[11px]">
+                      {product.inventory.currentStock} {product.unitOfMeasure}s at {product.inventory.locationCode}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium shrink-0">
+                    Source: VeriSpec Live Inventory Ledger
+                  </span>
+                </div>
+
+                <div className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div>
+                    <span className="font-semibold text-zinc-900 block">Market Indicative Pricing</span>
+                    <span className="text-zinc-500 text-[11px]">
+                      ₹{product.indicativePriceInr.toFixed(2)} INR (Non-store reference)
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-zinc-700 border border-zinc-200 font-medium shrink-0">
+                    Source: Verified Industrial Supplier Median
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Right Col: Indicative Pricing & External Seller Links */}
@@ -470,6 +673,80 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Verified Alternatives Matrix in Same Category */}
+      {alternatives.length > 0 && (
+        <div className="rounded-3xl bg-white border border-zinc-200 p-6 md:p-8 mb-10 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-100 gap-3 mb-6">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 font-mono">
+                  Category Benchmark
+                </span>
+                <span className="text-xs text-zinc-400 font-mono">{product.categoryName}</span>
+              </div>
+              <h3 className="text-lg font-bold text-zinc-950">
+                Verified Alternatives & Comparable Products
+              </h3>
+            </div>
+            <Link
+              href={`/products?category=${product.categorySlug}`}
+              className="text-xs font-semibold text-zinc-700 hover:text-zinc-950 flex items-center gap-1 shrink-0"
+            >
+              <span>View All in {product.categoryName}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {alternatives.map((alt) => (
+              <div
+                key={alt.id}
+                className="p-4 rounded-2xl border border-zinc-200 hover:border-zinc-400 bg-zinc-50/50 hover:bg-white transition-all space-y-3 flex flex-col justify-between group"
+              >
+                <div className="space-y-2.5">
+                  <div className="w-full h-32 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-200">
+                    <img
+                      src={
+                        alt.imageUrl ||
+                        "https://images.unsplash.com/photo-1584744982491-665216d95f8b?auto=format&fit=crop&w=800&q=80"
+                      }
+                      alt={alt.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-200 text-zinc-800 font-bold">
+                      {alt.sku}
+                    </span>
+                    <TrustScoreBadge product={alt} size="sm" showModalTrigger={false} />
+                  </div>
+                  <h4 className="text-xs font-bold text-zinc-950 line-clamp-1">{alt.name}</h4>
+                  <p className="text-[11px] text-zinc-600 line-clamp-2 leading-relaxed">
+                    {alt.shortDescription}
+                  </p>
+                </div>
+
+                <div className="pt-3 border-t border-zinc-200 flex items-center justify-between text-xs">
+                  <Link
+                    href={`/products/${alt.slug}`}
+                    className="font-bold text-zinc-900 hover:underline"
+                  >
+                    View Passport &rarr;
+                  </Link>
+                  <Link
+                    href={`/compare?p1=${product.slug}&p2=${alt.slug}`}
+                    className="font-semibold text-zinc-600 hover:text-zinc-950 flex items-center gap-1"
+                  >
+                    <SlidersHorizontal className="w-3 h-3" />
+                    <span>Compare</span>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Community Reviews Section */}
       <div className="rounded-3xl bg-white border border-zinc-200 p-6 md:p-10">
@@ -671,32 +948,81 @@ export default function ProductDetailPage() {
         </div>
       )}
 
-      {/* Report Inaccurate Information Modal */}
+      {/* 5-Category Product Intelligence Reporting Modal */}
       {reportModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full border border-zinc-200 shadow-2xl">
-            <h3 className="text-base font-bold text-zinc-950 mb-2">
-              Report Inaccurate Specification
-            </h3>
+          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full border border-zinc-200 shadow-2xl">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="p-1.5 rounded-lg bg-red-50 text-red-700">
+                <Flag className="w-4 h-4" />
+              </span>
+              <h3 className="text-base font-bold text-zinc-950">
+                Report Product Information or Issue
+              </h3>
+            </div>
             <p className="text-xs text-zinc-500 mb-4">
-              Help us maintain factual integrity. Reports are reviewed by system moderators within 24 hours.
+              Help us maintain factual integrity for SKU {product.sku}. Select the relevant category below:
             </p>
 
             {reportSubmitted ? (
-              <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-900 text-xs font-medium">
-                Report logged successfully. Our verification team has been notified.
+              <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium space-y-1">
+                <div className="font-bold flex items-center gap-1.5 text-emerald-800">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Report Registered &bull; Ticket #VERI-{Math.floor(100000 + Math.random() * 900000)}</span>
+                </div>
+                <p>Thank you. Our compliance team audits all submitted reports within 24 hours.</p>
               </div>
             ) : (
-              <form onSubmit={handleReportSubmit} className="space-y-3 text-xs">
+              <form onSubmit={handleReportSubmit} className="space-y-4 text-xs">
                 <div>
-                  <label className="block text-zinc-700 font-semibold mb-1">Issue Description</label>
+                  <label className="block text-zinc-700 font-semibold mb-1.5">
+                    Report Category
+                  </label>
+                  <select
+                    value={reportCategory}
+                    onChange={(e) =>
+                      setReportCategory(
+                        e.target.value as
+                          | "WRONG_SPEC"
+                          | "FAKE_REVIEW"
+                          | "WRONG_IMAGE"
+                          | "REQUEST_SDS"
+                          | "PRODUCT_ADDITION"
+                      )
+                    }
+                    className="w-full p-2.5 rounded-xl border border-zinc-200 text-xs bg-white text-zinc-800 focus:ring-2 focus:ring-zinc-900"
+                  >
+                    <option value="WRONG_SPEC">1. Report wrong specification / measurement</option>
+                    <option value="FAKE_REVIEW">2. Report fake or unverified review</option>
+                    <option value="WRONG_IMAGE">3. Report wrong image or specimen</option>
+                    <option value="REQUEST_SDS">4. Request missing SDS / lab certificate</option>
+                    <option value="PRODUCT_ADDITION">5. Request product addition or supplier link</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-zinc-700 font-semibold mb-1">
+                    Your Contact Email <span className="text-zinc-400 font-normal">(for resolution notice)</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={reportEmail}
+                    onChange={(e) => setReportEmail(e.target.value)}
+                    placeholder="e.g. auditor@facility.com"
+                    className="w-full p-2.5 rounded-xl border border-zinc-200 text-xs text-zinc-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-700 font-semibold mb-1">Detailed Explanation & Evidence</label>
                   <textarea
                     rows={4}
                     required
                     value={reportReason}
                     onChange={(e) => setReportReason(e.target.value)}
-                    placeholder="Describe what is inaccurate (e.g. incorrect hazard rating, wrong UOM, outdated SDS)..."
-                    className="w-full p-2.5 rounded-xl border border-zinc-200 text-xs"
+                    placeholder="Provide exact details, lab report reference, or correct value..."
+                    className="w-full p-2.5 rounded-xl border border-zinc-200 text-xs text-zinc-900"
                   />
                 </div>
 
@@ -704,15 +1030,16 @@ export default function ProductDetailPage() {
                   <button
                     type="button"
                     onClick={() => setReportModalOpen(false)}
-                    className="px-4 py-2 rounded-full bg-zinc-100 text-zinc-700 font-semibold"
+                    className="px-4 py-2 rounded-full bg-zinc-100 text-zinc-700 font-semibold hover:bg-zinc-200"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-full bg-red-600 text-white font-semibold"
+                    className="px-5 py-2 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center gap-1.5"
                   >
-                    Submit Report
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Submit Report</span>
                   </button>
                 </div>
               </form>

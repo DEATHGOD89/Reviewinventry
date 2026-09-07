@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { HeroShowcase } from "@/components/home/HeroShowcase";
 import { VisionSection } from "@/components/home/VisionSection";
+import { FourExperiencesSection } from "@/components/home/FourExperiencesSection";
 import { FeaturedCatalogueGrid } from "@/components/home/FeaturedCatalogueGrid";
 import { CinematicFeatureSection } from "@/components/home/CinematicFeatureSection";
 import { ReviewsCarousel } from "@/components/home/ReviewsCarousel";
@@ -57,7 +58,10 @@ export default function HomePage() {
       {/* 3. Vision & 3-Angle Perspective Section */}
       <VisionSection />
 
-      {/* 4. Dynamic Featured Master Catalog Grid */}
+      {/* 4. Four Specialized Experiences in One Platform */}
+      <FourExperiencesSection />
+
+      {/* 5. Dynamic Featured Master Catalog Grid */}
       <FeaturedCatalogueGrid />
 
       {/* 5. Cinematic Feature Section (Dark Section from reference image) */}
