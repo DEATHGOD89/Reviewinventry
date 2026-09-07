@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ProductItem } from "@/lib/catalog-data";
 import { getAllDynamicProducts } from "@/lib/services/products-crud";
+import { recordInventoryAdjustment } from "@/lib/services/inventory";
 import {
   Scan,
   Camera,
@@ -14,6 +15,8 @@ import {
   RefreshCw,
   QrCode,
   Package,
+  Plus,
+  Minus,
 } from "lucide-react";
 
 interface BarcodeScannerModalProps {
@@ -31,6 +34,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
   const [detectedProduct, setDetectedProduct] = useState<ProductItem | null>(null);
   const [isScanning, setIsScanning] = useState(true);
   const [scanStatus, setScanStatus] = useState<"IDLE" | "SUCCESS" | "NOT_FOUND">("IDLE");
+  const [quickAdjustFeedback, setQuickAdjustFeedback] = useState("");
 
   const allProducts = getAllDynamicProducts();
 
@@ -40,6 +44,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
       setDetectedProduct(null);
       setScanStatus("IDLE");
       setIsScanning(true);
+      setQuickAdjustFeedback("");
     }
   }, [isOpen]);
 
@@ -61,6 +66,34 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
     } else {
       setDetectedProduct(null);
       setScanStatus("NOT_FOUND");
+    }
+  };
+
+  const handleQuickStockAdjust = async (type: "STOCK_IN" | "STOCK_OUT", qty: number) => {
+    if (!detectedProduct) return;
+    try {
+      const res = await recordInventoryAdjustment({
+        productId: detectedProduct.id,
+        movementType: type,
+        quantity: qty,
+        mandatoryReason: `Physical aisle barcode scan reconciliation (${type === "STOCK_IN" ? "+" : "-"}${qty})`,
+        userEmail: "manager@verispec.local",
+      });
+
+      // Update local view
+      setDetectedProduct({
+        ...detectedProduct,
+        inventory: {
+          ...detectedProduct.inventory,
+          currentStock: res.newStock,
+          availableStock: Math.max(0, res.newStock - detectedProduct.inventory.reservedStock),
+        },
+      });
+
+      setQuickAdjustFeedback(`Stock updated: ${res.newStock} units ✓`);
+      setTimeout(() => setQuickAdjustFeedback(""), 3000);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -204,6 +237,39 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
                     Bin: <strong className="text-zinc-900">{detectedProduct.inventory.locationCode}</strong> &bull; Current:{" "}
                     <strong className="text-zinc-900">{detectedProduct.inventory.currentStock} {detectedProduct.unitOfMeasure}s</strong>
                   </div>
+                </div>
+              </div>
+
+              {/* 1-Tap Quick Shelf Audit Adjustments */}
+              <div className="p-2.5 rounded-xl bg-white border border-emerald-200/80 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+                    1-Tap Shelf Adjustment:
+                  </span>
+                  {quickAdjustFeedback && (
+                    <span className="text-[11px] font-bold text-emerald-700 font-mono">
+                      {quickAdjustFeedback}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleQuickStockAdjust("STOCK_IN", 10)}
+                    className="flex-1 py-1.5 px-2.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-mono text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>+10 Intake</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickStockAdjust("STOCK_OUT", 5)}
+                    className="flex-1 py-1.5 px-2.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-900 font-mono text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <Minus className="w-3 h-3" />
+                    <span>-5 Dispatch</span>
+                  </button>
                 </div>
               </div>
 

@@ -31,6 +31,7 @@ import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { WarehouseLabelModal } from "@/components/ui/WarehouseLabelModal";
 import { BarcodeScannerModal } from "@/components/ui/BarcodeScannerModal";
 import { ProductEditModal } from "@/components/management/ProductEditModal";
+import { PurchaseOrderModal } from "@/components/management/PurchaseOrderModal";
 import {
   getActiveStockAlerts,
   testDispatchWebhook,
@@ -81,6 +82,7 @@ export default function ManagementPortalPage() {
   const [selectedLabelProduct, setSelectedLabelProduct] = useState<ProductItem | null>(null);
   const [labelModalOpen, setLabelModalOpen] = useState(false);
   const [scannerModalOpen, setScannerModalOpen] = useState(false);
+  const [poModalOpen, setPoModalOpen] = useState(false);
   const kpis = getInventoryKpis();
 
   // Stock Adjustment State
@@ -819,14 +821,24 @@ export default function ManagementPortalPage() {
 
           {/* Alert Table */}
           <div className="rounded-3xl bg-white border border-zinc-200 shadow-xs overflow-hidden">
-            <div className="p-5 border-b border-zinc-200 flex items-center justify-between">
+            <div className="p-5 border-b border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Bell className="w-4 h-4 text-red-600" />
                 <h3 className="text-sm font-bold text-zinc-950">Triggered Threshold Breaches</h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-100 text-red-800 font-bold">
+                  {stockAlerts.length} Critical
+                </span>
               </div>
-              <span className="text-zinc-400 font-mono">
-                {stockAlerts.length} items currently below minimum stock threshold
-              </span>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPoModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold transition-all shadow-xs"
+                >
+                  <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Generate Reorder PO Requisition</span>
+                </button>
+              </div>
             </div>
 
             {stockAlerts.length === 0 ? (
@@ -1140,6 +1152,14 @@ export default function ManagementPortalPage() {
           setSelectedProductId(prodId);
           setAdjustModalOpen(true);
         }}
+      />
+
+      {/* Autonomous Reorder Purchase Order Modal */}
+      <PurchaseOrderModal
+        isOpen={poModalOpen}
+        onClose={() => setPoModalOpen(false)}
+        alerts={stockAlerts}
+        allProducts={products}
       />
     </div>
   );

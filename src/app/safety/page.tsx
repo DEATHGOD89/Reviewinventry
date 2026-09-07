@@ -17,6 +17,7 @@ import {
   Eye,
   AlertOctagon,
 } from "lucide-react";
+import { HazardProtocolWizard } from "@/components/safety/HazardProtocolWizard";
 
 export default function SafetyPage() {
   const [activeTab, setActiveTab] = useState<"policy" | "ghs" | "ppe" | "spill">("policy");
@@ -98,6 +99,9 @@ export default function SafetyPage() {
           Authoritative operating procedures governing personal protective equipment, chemical handling protocols, GHS hazard classifications, and platform transparency.
         </p>
       </div>
+
+      {/* Interactive Compliance Decision Engine */}
+      <HazardProtocolWizard />
 
       {/* Tab Navigation */}
       <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200 pb-3">
