@@ -16,6 +16,7 @@ export const VisionSection: React.FC = () => {
       badge: "Strict SDS Gate",
       href: "/products/caustic-soda",
       icon: Beaker,
+      image: "/images/hero_hazardous.jpg",
     },
     {
       title: "PPE Barrier & Mechanical Testing",
@@ -25,6 +26,7 @@ export const VisionSection: React.FC = () => {
       badge: "ISO Standard Check",
       href: "/products/chemical-gloves",
       icon: Layers,
+      image: "/images/hero_gloves.jpg",
     },
     {
       title: "Multi-Warehouse Inventory Control",
@@ -34,6 +36,7 @@ export const VisionSection: React.FC = () => {
       badge: "Real-time Telemetry",
       href: "/management",
       icon: FileCheck,
+      image: "/images/hero_respirator.jpg",
     },
   ];
 
@@ -117,26 +120,38 @@ export const VisionSection: React.FC = () => {
               </div>
             </div>
 
-            {/* Stylized Visual Mockup Card */}
-            <div className="rounded-2xl bg-zinc-950 p-6 text-white border border-zinc-800 shadow-2xl flex flex-col justify-between aspect-[4/3]">
-              <div className="flex items-center justify-between text-xs text-zinc-400 font-mono">
-                <span>VERISPEC TELEMETRY</span>
-                <span className="text-emerald-400 font-bold">LIVE AUDIT ACTIVE</span>
+            {/* Stylized Visual Mockup Card with Real Photo */}
+            <div className="relative rounded-2xl overflow-hidden bg-zinc-950 text-white border border-zinc-800 shadow-2xl aspect-[4/3] group">
+              <img
+                src={currentItem.image}
+                alt={currentItem.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-black/50 pointer-events-none" />
+
+              {/* Top HUD */}
+              <div className="absolute top-4 inset-x-4 flex items-center justify-between text-xs text-zinc-300 font-mono z-10">
+                <span className="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/15">
+                  VERISPEC TELEMETRY
+                </span>
+                <span className="flex items-center gap-1.5 bg-emerald-950/80 text-emerald-300 backdrop-blur-md px-2.5 py-1 rounded-md border border-emerald-400/30 font-bold text-[10px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>AUDIT ACTIVE</span>
+                </span>
               </div>
 
-              <div className="my-auto text-center space-y-2">
-                <div className="w-12 h-12 rounded-2xl bg-white/10 mx-auto flex items-center justify-center text-white">
-                  <IconComponent className="w-6 h-6" />
+              {/* Center Content */}
+              <div className="absolute inset-x-4 bottom-4 z-10 bg-black/75 backdrop-blur-md p-4 rounded-xl border border-white/15">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center text-white">
+                    <IconComponent className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-xs font-bold text-white">{currentItem.title}</span>
                 </div>
-                <div className="text-lg font-bold tracking-tight">{currentItem.title}</div>
-                <div className="text-xs text-zinc-400 font-mono">
-                  All 19 Master Products Controlled
+                <div className="flex items-center justify-between text-[11px] text-zinc-300 font-mono mt-1 pt-2 border-t border-white/10">
+                  <span>Standard: {currentItem.badge}</span>
+                  <span className="text-amber-300">Phase 1 Controlled</span>
                 </div>
-              </div>
-
-              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-400">
-                <span>Zero fabricated claims</span>
-                <span className="text-zinc-300">Phase 1 Draft Status</span>
               </div>
             </div>
           </div>

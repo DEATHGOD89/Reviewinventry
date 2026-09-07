@@ -1,15 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Shield, Search, SlidersHorizontal, User, Menu, X, ArrowUpRight } from "lucide-react";
+import { Shield, Search, SlidersHorizontal, User, Menu, X, ArrowUpRight, ArrowRight, Package } from "lucide-react";
+import { getAllDynamicProducts } from "@/lib/services/products-crud";
+import { ProductItem } from "@/lib/catalog-data";
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [allProducts, setAllProducts] = useState<ProductItem[]>([]);
+
+  useEffect(() => {
+    setAllProducts(getAllDynamicProducts());
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchModalOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -62,10 +78,14 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSearchModalOpen(true)}
-              className="p-2.5 rounded-full bg-white/85 backdrop-blur-md border border-zinc-200 text-zinc-700 hover:text-zinc-950 hover:bg-white shadow-xs transition-colors"
-              title="Search catalogue"
+              className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/85 backdrop-blur-md border border-zinc-200 text-zinc-700 hover:text-zinc-950 hover:bg-white shadow-xs transition-colors"
+              title="Search catalogue (Ctrl+K)"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-3.5 h-3.5" />
+              <span className="hidden lg:inline text-xs text-zinc-400">Search</span>
+              <kbd className="hidden lg:inline text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200">
+                ⌘K
+              </kbd>
             </button>
 
             <Link
@@ -163,30 +183,111 @@ export const Navbar: React.FC = () => {
               </button>
             </div>
 
-            <div className="pt-4">
-              <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-                Quick Category Shortcuts
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  "Nitrile gloves",
-                  "Caustic soda",
-                  "Chemical gloves",
-                  "Safety shoes",
-                  "Mask",
-                  "Divo Flow",
-                  "Toilet cleaner",
-                ].map((item) => (
-                  <Link
-                    key={item}
-                    href={`/products?q=${encodeURIComponent(item)}`}
-                    onClick={() => setSearchModalOpen(false)}
-                    className="px-3 py-1.5 rounded-full bg-zinc-100 text-xs font-medium text-zinc-700 hover:bg-zinc-900 hover:text-white transition-colors"
-                  >
-                    {item}
-                  </Link>
-                ))}
-              </div>
+            <div className="pt-4 max-h-[60vh] overflow-y-auto">
+              {searchQuery.trim().length > 0 ? (
+                <div>
+                  <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
+                    Matching Products ({allProducts.filter(p =>
+                      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      p.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
+                    ).length})
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {allProducts
+                      .filter(p =>
+                        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        p.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
+                      .slice(0, 6)
+                      .map((p) => (
+                        <Link
+                          key={p.id}
+                          href={`/products/${p.slug}`}
+                          onClick={() => setSearchModalOpen(false)}
+                          className="p-2.5 rounded-2xl hover:bg-zinc-100 flex items-center justify-between gap-3 transition-colors group"
+                        >
+                          <div className="flex items-center gap-3">
+                            {p.imageUrl ? (
+                              <img
+                                src={p.imageUrl}
+                                alt={p.name}
+                                className="w-9 h-9 rounded-xl object-cover border border-zinc-200 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-9 h-9 rounded-xl bg-zinc-100 flex items-center justify-center text-xs shrink-0">
+                                📦
+                              </div>
+                            )}
+                            <div>
+                              <div className="text-xs font-bold text-zinc-950 group-hover:text-zinc-700 transition-colors">
+                                {p.name}
+                              </div>
+                              <div className="text-[10px] text-zinc-500 font-mono">
+                                {p.sku} &bull; {p.categoryName}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 font-semibold">
+                              {p.inventory.currentStock} in stock
+                            </span>
+                            <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
+                          </div>
+                        </Link>
+                      ))}
+
+                    {allProducts.filter(p =>
+                      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      p.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
+                    ).length === 0 && (
+                      <div className="py-6 text-center text-xs text-zinc-500">
+                        No products found matching &ldquo;{searchQuery}&rdquo;.
+                      </div>
+                    )}
+
+                    <div className="pt-2 border-t border-zinc-100 text-center">
+                      <Link
+                        href={`/products?q=${encodeURIComponent(searchQuery)}`}
+                        onClick={() => setSearchModalOpen(false)}
+                        className="text-xs font-semibold text-zinc-700 hover:text-zinc-950"
+                      >
+                        View all results in Catalogue &rarr;
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">
+                    Quick Category Shortcuts
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      "Nitrile gloves",
+                      "Caustic soda",
+                      "Chemical gloves",
+                      "Safety shoes",
+                      "Mask",
+                      "Divo Flow",
+                      "Toilet cleaner",
+                    ].map((item) => (
+                      <Link
+                        key={item}
+                        href={`/products?q=${encodeURIComponent(item)}`}
+                        onClick={() => setSearchModalOpen(false)}
+                        className="px-3 py-1.5 rounded-full bg-zinc-100 text-xs font-medium text-zinc-700 hover:bg-zinc-900 hover:text-white transition-colors"
+                      >
+                        {item}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

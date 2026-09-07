@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Play, ShieldAlert, Cpu, Eye, FileText, CheckCircle2, Lock, ArrowUpRight } from "lucide-react";
+import { Play, ShieldAlert, Cpu, Eye, FileText, CheckCircle2, Lock, ArrowUpRight, ArrowRight } from "lucide-react";
 
 export const CinematicFeatureSection: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -71,21 +71,95 @@ export const CinematicFeatureSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Video / Interactive Simulation Stage */}
-          <div className="relative aspect-[21/9] rounded-2xl bg-gradient-to-tr from-black via-zinc-900 to-zinc-950 border border-white/10 flex flex-col items-center justify-center text-center p-6 overflow-hidden">
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="w-16 h-16 rounded-full bg-white text-zinc-950 flex items-center justify-center shadow-xl hover:scale-110 transition-transform mb-3 group"
-              title="Toggle interactive telemetry view"
-            >
-              <Play className="w-6 h-6 fill-zinc-950 ml-0.5" />
-            </button>
-            <span className="text-sm font-bold tracking-tight text-white">
-              {isPlaying ? "Telemetry Simulation Active" : "Click to Inspect Telemetry Stream"}
-            </span>
-            <span className="text-xs text-zinc-400 mt-1 font-mono">
-              Live Stock Tracking &bull; 19 Initial Master Products &bull; 2 Warehouses
-            </span>
+          {/* Video / Interactive Simulation Stage with High-Tech Photographic Backdrop */}
+          <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-2xl bg-zinc-950 border border-white/15 overflow-hidden group shadow-2xl">
+            {/* Background Facility Image */}
+            <img
+              src="/images/hero_hazardous.jpg"
+              alt="VeriSpec Chemical Facility"
+              className={`w-full h-full object-cover transition-all duration-700 ${
+                isPlaying ? "scale-105 filter brightness-40 contrast-125" : "filter brightness-60 group-hover:scale-102"
+              }`}
+            />
+
+            {/* Dark Ambient Gradients */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none" />
+
+            {/* Telemetry Corner Brackets */}
+            <div className="absolute top-4 left-4 z-20 flex items-center gap-2 text-[10px] font-mono text-zinc-300 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/15">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>FACILITY SENSORS ACTIVE &bull; ZONE A-04</span>
+            </div>
+
+            <div className="absolute top-4 right-4 z-20 text-[10px] font-mono text-amber-300 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-amber-400/30">
+              HAZMAT PROTOCOL: GHS-08 ENFORCED
+            </div>
+
+            {/* Interactive Overlay When Playing */}
+            {isPlaying ? (
+              <div className="absolute inset-0 z-20 p-6 md:p-8 flex flex-col justify-between bg-black/50 backdrop-blur-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-auto">
+                  <div className="p-3.5 rounded-xl bg-black/80 border border-white/15 text-left">
+                    <span className="text-[10px] font-mono text-zinc-400 uppercase block">Containment Sump</span>
+                    <span className="text-base md:text-lg font-black text-emerald-400 font-mono">12% Nominal</span>
+                    <span className="text-[9px] text-zinc-500 block mt-0.5">Spill Barrier Intact</span>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-black/80 border border-white/15 text-left">
+                    <span className="text-[10px] font-mono text-zinc-400 uppercase block">Airborne Vapor</span>
+                    <span className="text-base md:text-lg font-black text-cyan-400 font-mono">0.03 PPM</span>
+                    <span className="text-[9px] text-zinc-500 block mt-0.5">Below OSHA Ceiling</span>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-black/80 border border-white/15 text-left">
+                    <span className="text-[10px] font-mono text-zinc-400 uppercase block">Airflow Pressure</span>
+                    <span className="text-base md:text-lg font-black text-white font-mono">+24 Pa Positive</span>
+                    <span className="text-[9px] text-zinc-500 block mt-0.5">Cleanroom Differential</span>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-black/80 border border-white/15 text-left">
+                    <span className="text-[10px] font-mono text-zinc-400 uppercase block">Audit Verification</span>
+                    <span className="text-base md:text-lg font-black text-amber-300 font-mono">100% Traceable</span>
+                    <span className="text-[9px] text-zinc-500 block mt-0.5">Mandatory Reason Gate</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/15">
+                  <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    <span>Streaming live movements from 2 facility depots</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setIsPlaying(false)}
+                      className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/15 transition-colors"
+                    >
+                      Pause Stream
+                    </button>
+                    <Link
+                      href="/management"
+                      className="px-4 py-2 rounded-full bg-white text-zinc-950 text-xs font-bold hover:bg-zinc-200 transition-colors flex items-center gap-1.5 shadow-md"
+                    >
+                      <span>Open Management Portal</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center p-6">
+                <button
+                  onClick={() => setIsPlaying(true)}
+                  className="w-16 h-16 rounded-full bg-white text-zinc-950 flex items-center justify-center shadow-2xl hover:scale-110 transition-transform mb-3 group/btn"
+                  title="Inspect real-time facility telemetry stream"
+                >
+                  <Play className="w-6 h-6 fill-zinc-950 ml-0.5 group-hover/btn:scale-110 transition-transform" />
+                </button>
+                <span className="text-base font-bold tracking-tight text-white drop-shadow-md">
+                  Inspect Live Warehouse & Environmental Telemetry
+                </span>
+                <span className="text-xs text-zinc-300 mt-1 font-mono drop-shadow-sm">
+                  Continuous Stock Monitoring &bull; 19 Master Products &bull; Zero Fabricated Records
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
