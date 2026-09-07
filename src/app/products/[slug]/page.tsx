@@ -5,7 +5,7 @@ import { useParams, notFound } from "next/navigation";
 import Link from "next/link";
 import { INITIAL_19_PRODUCTS, ProductItem } from "@/lib/catalog-data";
 import { getDynamicProductBySlug } from "@/lib/services/products-crud";
-import { VerificationBadge } from "@/components/ui/VerificationBadge";
+import { VerificationBadge, AuditorBadge } from "@/components/ui/VerificationBadge";
 import { CurrencySelector } from "@/components/ui/CurrencySelector";
 import { Product360Viewer } from "@/components/ui/Product360Viewer";
 import { convertFromInr, INDICATIVE_PRICE_DISCLAIMER } from "@/lib/services/currency";
@@ -27,7 +27,10 @@ import {
   Info,
   Camera,
   RotateCw,
+  QrCode,
 } from "lucide-react";
+import { WarehouseLabelModal } from "@/components/ui/WarehouseLabelModal";
+import { SdsDocumentViewer } from "@/components/ui/SdsDocumentViewer";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -39,6 +42,7 @@ export default function ProductDetailPage() {
   const [selectedCurrency, setSelectedCurrency] = useState<string>("INR");
   const [activeMediaView, setActiveMediaView] = useState<"photo" | "360">("photo");
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number>(0);
+  const [labelModalOpen, setLabelModalOpen] = useState<boolean>(false);
   const [reportModalOpen, setReportModalOpen] = useState<boolean>(false);
   const [reportSubmitted, setReportSubmitted] = useState<boolean>(false);
   const [reportReason, setReportReason] = useState<string>("");
@@ -50,6 +54,8 @@ export default function ProductDetailPage() {
   const [reviewContent, setReviewContent] = useState<string>("");
   const [reviewerName, setReviewerName] = useState<string>("");
   const [reviewerEmail, setReviewerEmail] = useState<string>("");
+  const [reviewerRole, setReviewerRole] = useState<string>("");
+  const [auditorRegistrationNumber, setAuditorRegistrationNumber] = useState<string>("");
   const [reviewSuccessMsg, setReviewSuccessMsg] = useState<string>("");
 
   if (!product) {
@@ -67,6 +73,8 @@ export default function ProductDetailPage() {
         productName: product.name,
         reviewerName: reviewerName || "Verified Auditor",
         reviewerEmail: reviewerEmail || "auditor@verispec.local",
+        reviewerRole: reviewerRole || undefined,
+        auditorRegistrationNumber: auditorRegistrationNumber || undefined,
         rating: reviewRating,
         title: reviewTitle,
         content: reviewContent,
@@ -112,6 +120,13 @@ export default function ProductDetailPage() {
 
         <div className="flex items-center gap-3">
           <VerificationBadge status={product.status} confidence={product.dataConfidenceLevel} />
+          <button
+            onClick={() => setLabelModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold transition-colors"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>Print Bin & Rack Label</span>
+          </button>
           <button
             onClick={() => setReportModalOpen(true)}
             className="inline-flex items-center gap-1 text-[11px] text-zinc-500 hover:text-zinc-900 underline underline-offset-4"
@@ -320,6 +335,11 @@ export default function ProductDetailPage() {
                 </div>
               </div>
             )}
+
+            {/* GHS 16-Section Safety Data Sheet (SDS) & Regulatory Compliance */}
+            <div className="pt-2">
+              <SdsDocumentViewer product={product} />
+            </div>
           </div>
 
           {/* Right Col: Indicative Pricing & External Seller Links */}
@@ -437,11 +457,15 @@ export default function ProductDetailPage() {
             {approvedReviews.map((rev) => (
               <div key={rev.id} className="pt-6 first:pt-0 space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-bold text-zinc-900">{rev.reviewerName}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-semibold">
-                      Verified Review
-                    </span>
+                    {rev.isAuditorVerified ? (
+                      <AuditorBadge role={rev.reviewerRole} registrationNumber={rev.auditorRegistrationNumber} />
+                    ) : (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-semibold">
+                        Verified Review
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center text-amber-500">
                     {[1, 2, 3, 4, 5].map((s) => (
@@ -513,6 +537,33 @@ export default function ProductDetailPage() {
                     placeholder="e.g. auditor@company.com"
                     className="w-full p-2.5 rounded-xl border border-zinc-200 text-xs"
                   />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-zinc-700 font-semibold mb-1">
+                      Auditor Role / Title <span className="text-zinc-400 font-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={reviewerRole}
+                      onChange={(e) => setReviewerRole(e.target.value)}
+                      placeholder="e.g. Lead EHS Inspector"
+                      className="w-full p-2.5 rounded-xl border border-zinc-200 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-700 font-semibold mb-1">
+                      Auditor Reg # <span className="text-zinc-400 font-normal">(for verified badge)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={auditorRegistrationNumber}
+                      onChange={(e) => setAuditorRegistrationNumber(e.target.value)}
+                      placeholder="e.g. ISO-45001-889"
+                      className="w-full p-2.5 rounded-xl border border-zinc-200 text-xs font-mono"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -624,6 +675,13 @@ export default function ProductDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Printable Warehouse Bin & Rack Label Modal */}
+      <WarehouseLabelModal
+        product={product}
+        isOpen={labelModalOpen}
+        onClose={() => setLabelModalOpen(false)}
+      />
     </div>
   );
 }

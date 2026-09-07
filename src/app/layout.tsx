@@ -3,11 +3,13 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CustomerCareBot } from "@/components/support/CustomerCareBot";
+import { OfflineStatusBar } from "@/components/ui/OfflineStatusBar";
 
 export const metadata: Metadata = {
   title: "VeriSpec | Verified Industrial Inventory & Trusted Review Intelligence",
   description:
     "High-traffic inventory management, trusted product review, and safety compliance platform. 19 initial master products across PPE, chemicals, and waste containment.",
+  manifest: "/manifest.json",
   keywords: [
     "industrial inventory",
     "PPE verification",
@@ -28,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased scroll-smooth">
       <body className="min-h-full flex flex-col bg-[#f7f7f9] text-zinc-900 selection:bg-zinc-900 selection:text-white">
+        <OfflineStatusBar />
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

@@ -1,0 +1,24 @@
+{
+  "name": "VeriSpec Industrial Logistics & Safety Inspector",
+  "short_name": "VeriSpec PWA",
+  "description": "Offline-ready industrial product specifications, safety data sheets, and warehouse inventory control.",
+  "start_url": "/products",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/next.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/next.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

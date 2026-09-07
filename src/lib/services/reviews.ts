@@ -20,6 +20,9 @@ export interface ReviewItem {
   pros?: string;
   cons?: string;
   useCase?: string;
+  reviewerRole?: string;
+  auditorRegistrationNumber?: string;
+  isAuditorVerified?: boolean;
   status: "PENDING" | "APPROVED" | "REJECTED";
   rejectionReason?: string;
   helpfulVotes: number;
@@ -35,6 +38,9 @@ const reviewsStore: ReviewItem[] = [
     productName: "Nitrile gloves",
     reviewerName: "R. Sharma (Pharma QC Auditor)",
     reviewerEmail: "auditor.pharma@verispec.local",
+    reviewerRole: "Certified Cleanroom Auditor",
+    auditorRegistrationNumber: "ISO-45001-IN-8891",
+    isAuditorVerified: true,
     rating: 4,
     dimensionalRatings: { quality: 4, comfort: 4, durability: 4, value: 4, packaging: 4, effectiveness: 5 },
     title: "Reliable tactile sensitivity for diagnostic packaging",
@@ -53,6 +59,9 @@ const reviewsStore: ReviewItem[] = [
     productName: "Chemical gloves",
     reviewerName: "Dr. K. Patel (Industrial Chemist)",
     reviewerEmail: "k.patel@verispec.local",
+    reviewerRole: "Senior Chemical Safety Officer",
+    auditorRegistrationNumber: "OSHA-HAZMAT-9021",
+    isAuditorVerified: true,
     rating: 4,
     dimensionalRatings: { quality: 5, comfort: 3, durability: 5, value: 4, packaging: 4, effectiveness: 4 },
     title: "Sturdy gauntlet barrier; waiting on EN 374 test certification",
@@ -87,6 +96,8 @@ export async function submitNewReview(params: {
   cons?: string;
   useCase?: string;
   dimensionalRatings?: Partial<ReviewItem["dimensionalRatings"]>;
+  reviewerRole?: string;
+  auditorRegistrationNumber?: string;
 }): Promise<{ success: boolean; message: string; review: ReviewItem }> {
   if (!params.title || params.title.trim().length < 4) {
     throw new Error("Review title must be at least 4 characters long.");
@@ -104,6 +115,9 @@ export async function submitNewReview(params: {
     productName: params.productName,
     reviewerName: params.reviewerName,
     reviewerEmail: params.reviewerEmail,
+    reviewerRole: params.reviewerRole || "Registered Industry Reviewer",
+    auditorRegistrationNumber: params.auditorRegistrationNumber,
+    isAuditorVerified: !!params.auditorRegistrationNumber,
     rating: params.rating,
     dimensionalRatings: {
       quality: params.dimensionalRatings?.quality || params.rating,

@@ -26,8 +26,18 @@ import {
   SupportTicket,
 } from "@/lib/services/support-tickets";
 import { ProductItem } from "@/lib/catalog-data";
-import { VerificationBadge } from "@/components/ui/VerificationBadge";
+import { VerificationBadge, AuditorBadge } from "@/components/ui/VerificationBadge";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import { WarehouseLabelModal } from "@/components/ui/WarehouseLabelModal";
+import { BarcodeScannerModal } from "@/components/ui/BarcodeScannerModal";
+import {
+  getActiveStockAlerts,
+  testDispatchWebhook,
+  getWebhookConfig,
+  updateWebhookConfig,
+  StockAlert,
+  WebhookConfig,
+} from "@/lib/services/stock-alerts";
 import {
   Box,
   Layers,
@@ -49,17 +59,27 @@ import {
   BarChart3,
   Clock,
   Send,
+  QrCode,
+  Bell,
+  Webhook,
+  Scan,
 } from "lucide-react";
 
 export default function ManagementPortalPage() {
   const [activeTab, setActiveTab] = useState<
-    "inventory" | "products" | "reviews" | "analytics" | "tickets" | "imports"
+    "inventory" | "products" | "reviews" | "analytics" | "tickets" | "alerts" | "imports"
   >("inventory");
 
   const [products, setProducts] = useState<ProductItem[]>(getAllDynamicProducts());
   const [movements, setMovements] = useState<StockMovementRecord[]>(getStockMovements());
   const [reviews, setReviews] = useState<ReviewItem[]>(getAllReviewsForModeration());
   const [tickets, setTickets] = useState<SupportTicket[]>(getAllSupportTickets());
+  const [stockAlerts, setStockAlerts] = useState<StockAlert[]>(getActiveStockAlerts());
+  const [webhookConfig, setWebhookConfig] = useState<WebhookConfig>(getWebhookConfig());
+  const [alertDispatchMsg, setAlertDispatchMsg] = useState("");
+  const [selectedLabelProduct, setSelectedLabelProduct] = useState<ProductItem | null>(null);
+  const [labelModalOpen, setLabelModalOpen] = useState(false);
+  const [scannerModalOpen, setScannerModalOpen] = useState(false);
   const kpis = getInventoryKpis();
 
   // Stock Adjustment State
@@ -117,6 +137,17 @@ export default function ManagementPortalPage() {
       }, 1500);
     } catch (err: unknown) {
       setAdjustError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const handleTestWebhook = async (alertItem: StockAlert) => {
+    setAlertDispatchMsg(`Dispatching reorder webhook to ${webhookConfig.channel}...`);
+    try {
+      const res = await testDispatchWebhook(alertItem, "manager@verispec.local");
+      setAlertDispatchMsg(res.message);
+      setTimeout(() => setAlertDispatchMsg(""), 5000);
+    } catch (err: unknown) {
+      setAlertDispatchMsg(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -238,6 +269,14 @@ export default function ManagementPortalPage() {
 
         <div className="flex flex-wrap items-center gap-2.5">
           <button
+            onClick={() => setScannerModalOpen(true)}
+            className="px-4 py-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-850 text-xs font-semibold transition-colors flex items-center gap-1.5 border border-zinc-200 shadow-2xs"
+          >
+            <Scan className="w-3.5 h-3.5 text-zinc-700" />
+            <span>Scan Barcode / QR</span>
+          </button>
+
+          <button
             onClick={() => setAdjustModalOpen(true)}
             className="px-4 py-2 rounded-full bg-zinc-950 text-white text-xs font-semibold hover:bg-zinc-800 transition-colors flex items-center gap-1.5 shadow-xs"
           >
@@ -315,6 +354,7 @@ export default function ManagementPortalPage() {
           { id: "products", label: `Products Master (${products.length})` },
           { id: "analytics", label: "Daily / Monthly Analytics & Graphs" },
           { id: "tickets", label: `AI Support Tickets (${tickets.length})` },
+          { id: "alerts", label: `Low-Stock Alerts & Webhooks (${stockAlerts.length})` },
           { id: "reviews", label: `Review Moderation (${reviews.length})` },
           { id: "imports", label: "CSV Import & Export" },
         ].map((tab) => (
@@ -397,15 +437,27 @@ export default function ManagementPortalPage() {
                           )}
                         </td>
                         <td className="p-3.5 text-right">
-                          <button
-                            onClick={() => {
-                              setSelectedProductId(p.id);
-                              setAdjustModalOpen(true);
-                            }}
-                            className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-[11px] font-semibold text-zinc-800"
-                          >
-                            Adjust
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => {
+                                setSelectedLabelProduct(p);
+                                setLabelModalOpen(true);
+                              }}
+                              className="p-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors"
+                              title="Print QR & Barcode Bin Label"
+                            >
+                              <QrCode className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSelectedProductId(p.id);
+                                setAdjustModalOpen(true);
+                              }}
+                              className="px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-[11px] font-semibold text-zinc-800 transition-colors"
+                            >
+                              Adjust
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -559,6 +611,16 @@ export default function ManagementPortalPage() {
                               View
                             </Link>
                             <button
+                              onClick={() => {
+                                setSelectedLabelProduct(p);
+                                setLabelModalOpen(true);
+                              }}
+                              className="p-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors"
+                              title="Print QR & Barcode Bin Label"
+                            >
+                              <QrCode className="w-3.5 h-3.5" />
+                            </button>
+                            <button
                               onClick={() => openEditProductModal(p)}
                               className="p-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700"
                               title="Edit specifications"
@@ -709,6 +771,9 @@ export default function ManagementPortalPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-zinc-900">{rev.reviewerName}</span>
                     <span className="text-[10px] text-zinc-400">({rev.reviewerEmail})</span>
+                    {rev.isAuditorVerified && (
+                      <AuditorBadge role={rev.reviewerRole} registrationNumber={rev.auditorRegistrationNumber} />
+                    )}
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                         rev.status === "APPROVED"
@@ -757,6 +822,126 @@ export default function ManagementPortalPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab 5: Low-Stock Automated Webhooks & Alerts */}
+      {activeTab === "alerts" && (
+        <div className="space-y-6 text-xs">
+          {/* Top Banner & Webhook Dispatch Toast */}
+          {alertDispatchMsg && (
+            <div className="p-3.5 rounded-2xl bg-zinc-950 text-white font-mono flex items-center justify-between shadow-lg">
+              <span>{alertDispatchMsg}</span>
+              <span className="text-[10px] text-zinc-400">Audit Log Recorded</span>
+            </div>
+          )}
+
+          {/* Webhook Channel Config Card */}
+          <div className="p-6 rounded-3xl bg-white border border-zinc-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-2xl bg-amber-100 text-amber-900">
+                <Webhook className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-zinc-950">Automated Reorder Threshold Webhook Daemon</h3>
+                <p className="text-zinc-500">
+                  Broadcasts instant notifications to procurement teams when warehouse stock falls below minimum levels.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <select
+                value={webhookConfig.channel}
+                onChange={(e) =>
+                  setWebhookConfig(updateWebhookConfig({ channel: e.target.value as WebhookConfig["channel"] }))
+                }
+                className="px-3 py-1.5 rounded-full border border-zinc-200 bg-zinc-50 text-xs font-bold text-zinc-800"
+              >
+                <option value="SLACK">Slack Webhook</option>
+                <option value="EMAIL">Procurement Email Gateway</option>
+                <option value="SMS">Emergency SMS API</option>
+              </select>
+
+              <button
+                onClick={() =>
+                  alert(`Webhook configuration updated! Active channel: ${webhookConfig.channel}. Endpoint: ${webhookConfig.endpointUrl}`)
+                }
+                className="px-4 py-1.5 rounded-full bg-zinc-950 text-white font-semibold text-xs hover:bg-zinc-800"
+              >
+                Save Channel
+              </button>
+            </div>
+          </div>
+
+          {/* Alert Table */}
+          <div className="rounded-3xl bg-white border border-zinc-200 shadow-xs overflow-hidden">
+            <div className="p-5 border-b border-zinc-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bell className="w-4 h-4 text-red-600" />
+                <h3 className="text-sm font-bold text-zinc-950">Triggered Threshold Breaches</h3>
+              </div>
+              <span className="text-zinc-400 font-mono">
+                {stockAlerts.length} items currently below minimum stock threshold
+              </span>
+            </div>
+
+            {stockAlerts.length === 0 ? (
+              <div className="p-8 text-center text-zinc-500">
+                All inventory items are currently above minimum safety thresholds.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-zinc-50 border-b border-zinc-200 font-bold text-zinc-600">
+                      <th className="p-3.5">SKU</th>
+                      <th className="p-3.5">Product Name</th>
+                      <th className="p-3.5">Warehouse</th>
+                      <th className="p-3.5">Current Stock</th>
+                      <th className="p-3.5">Min Threshold</th>
+                      <th className="p-3.5">Stock Deficit</th>
+                      <th className="p-3.5">Suggested Reorder</th>
+                      <th className="p-3.5">Severity</th>
+                      <th className="p-3.5 text-right">Webhook Dispatch</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {stockAlerts.map((alert) => (
+                      <tr key={alert.id} className="hover:bg-zinc-50/80">
+                        <td className="p-3.5 font-mono font-bold text-zinc-700">{alert.sku}</td>
+                        <td className="p-3.5 font-bold text-zinc-950">{alert.productName}</td>
+                        <td className="p-3.5 font-mono text-zinc-500">{alert.locationCode}</td>
+                        <td className="p-3.5 font-mono font-bold text-red-700">{alert.currentStock}</td>
+                        <td className="p-3.5 font-mono text-zinc-500">{alert.minStock}</td>
+                        <td className="p-3.5 font-mono text-red-600">-{alert.deficit} units</td>
+                        <td className="p-3.5 font-mono text-zinc-800 font-semibold">{alert.suggestedReorderQty} units</td>
+                        <td className="p-3.5">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              alert.severity === "CRITICAL"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-amber-100 text-amber-800"
+                            }`}
+                          >
+                            {alert.severity}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-right">
+                          <button
+                            onClick={() => handleTestWebhook(alert)}
+                            className="px-3 py-1 rounded-full bg-zinc-950 hover:bg-zinc-800 text-white text-[11px] font-bold transition-all shadow-xs"
+                          >
+                            Dispatch Notice
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1114,6 +1299,23 @@ export default function ManagementPortalPage() {
           </div>
         </div>
       )}
+
+      {/* Warehouse QR & Barcode Bin Label Modal */}
+      <WarehouseLabelModal
+        product={selectedLabelProduct}
+        isOpen={labelModalOpen}
+        onClose={() => setLabelModalOpen(false)}
+      />
+
+      {/* Handheld & Camera Barcode Scanner Modal */}
+      <BarcodeScannerModal
+        isOpen={scannerModalOpen}
+        onClose={() => setScannerModalOpen(false)}
+        onSelectProductForAdjustment={(prodId) => {
+          setSelectedProductId(prodId);
+          setAdjustModalOpen(true);
+        }}
+      />
     </div>
   );
 }
