@@ -1,22 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f7f9;
-  --foreground: #09090b;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --card: #ffffff;
-  --card-foreground: #09090b;
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #09090b;
-  --primary: #09090b;
-  --primary-foreground: #fafafa;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #18181b;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #f4f4f5;
-  --accent-foreground: #18181b;
-  --border: #e4e4e7;
-  --ring: #18181b;
+  --popover-foreground: #0f172a;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --border: #e2e8f0;
+  --ring: #6366f1;
   --radius: 0.75rem;
 }
 
@@ -29,45 +30,168 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Glassmorphism & Pill design tokens */
-.glass-pill {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+/* Micro-dot grid background inspired by quso.ai */
+.bg-dot-grid {
+  background-image: radial-gradient(rgba(100, 116, 139, 0.16) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
-.glass-pill-dark {
-  background: rgba(10, 10, 12, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+.bg-dot-grid-subtle {
+  background-image: radial-gradient(rgba(99, 102, 241, 0.12) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
 }
 
-.card-obsidian {
-  background-color: #0c0c0e;
-  color: #f4f4f6;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Radiant glow backdrops */
+.hero-mesh-glow {
+  background: radial-gradient(circle at 50% 30%, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.04) 40%, transparent 70%);
 }
 
-/* Interactive callout pointer line */
-.pointer-line-horizontal {
-  position: relative;
-}
-.pointer-line-horizontal::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 32px;
-  height: 1px;
-  background: rgba(0, 0, 0, 0.2);
+/* Vibrant typography gradients */
+.text-gradient-purple {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Glow effects */
-.subtle-glow {
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.07);
+.text-gradient-dark {
+  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.dark-glow {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+/* Modern Pill Button Tokens */
+.btn-purple {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-purple:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  box-shadow: 0 14px 28px -5px rgba(79, 70, 229, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-odoo-action {
+  background-color: #714b67;
+  color: #ffffff;
+  transition: all 0.15s ease;
+}
+.btn-odoo-action:hover {
+  background-color: #5d3d54;
+}
+
+/* Glass & Card Tokens */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+}
+
+.card-saas {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+}
+
+.card-saas-elevated {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08);
+}
+
+/* Odoo Spreadsheet Table styling */
+.odoo-table-header th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.odoo-table-row {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.12s ease;
+}
+.odoo-table-row:hover {
+  background-color: #f8faff;
+}
+
+/* Star Twinkle, Pop & Ray Animations */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.15;
+    transform: scale(0.65);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+    filter: drop-shadow(0 0 7px rgba(99, 102, 241, 0.75));
+  }
+}
+
+@keyframes starPop {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 0.95;
+    transform: scale(1.3) rotate(35deg);
+    filter: drop-shadow(0 0 9px rgba(124, 58, 237, 0.85));
+  }
+  45% {
+    opacity: 0.5;
+    transform: scale(0.85) rotate(70deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.2) rotate(115deg);
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.8));
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(160deg);
+  }
+}
+
+@keyframes rayPulse {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes haloPulse {
+  0%, 100% {
+    transform: scale(0.95);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.8;
+  }
+}
+
+.animate-twinkle {
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+
+.animate-star-pop {
+  animation: starPop 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-ray-pulse {
+  animation: rayPulse 2s linear infinite;
+}
+
+.animate-halo-pulse {
+  animation: haloPulse 3.5s ease-in-out infinite;
 }

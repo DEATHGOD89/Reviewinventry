@@ -123,7 +123,7 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div className="pt-28 pb-24 px-6 max-w-6xl mx-auto">
+    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
       {/* Breadcrumb & Verification Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6 text-xs text-zinc-500">
         <div className="flex items-center gap-2">

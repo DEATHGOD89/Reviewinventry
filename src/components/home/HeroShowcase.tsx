@@ -1,498 +1,487 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
-  ShieldCheck,
-  CheckCircle,
-  ExternalLink,
+  Play,
+  Trash2,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  MoreVertical,
+  Check,
+  Video,
   Sparkles,
+  Download,
+  Share2,
+  Clock,
   Layers,
-  Box,
-  Info,
-  Warehouse,
   FileText,
-  Beaker,
-  AlertTriangle,
-  SlidersHorizontal,
-  Eye,
-  ShieldAlert,
-  Award,
+  ShieldCheck,
 } from "lucide-react";
 
-interface ShowcaseProduct {
-  id: string;
-  slug: string;
-  name: string;
-  category: string;
-  sku: string;
-  warehouseLocation: string;
-  stockUnits: number;
-  standard: string;
-  image: string;
-  badge: string;
-  indicativePriceInr: number;
-  hotspots: {
-    label: string;
-    standard: string;
-    x: string;
-    y: string;
-  }[];
-  angles: {
-    title: string;
-    note: string;
-  }[];
-}
-
-const SHOWCASE_PRODUCTS: ShowcaseProduct[] = [
-  {
-    id: "respirator",
-    slug: "full-face-chemical-respirator",
-    name: "Full-Face Chemical Respirator",
-    category: "Respiratory & Gas Protection",
-    sku: "VS-PPE-020",
-    warehouseLocation: "WH-MAIN-01 • Zone B-02",
-    stockUnits: 840,
-    standard: "EN 136:1998 / NIOSH TC-84A",
-    image: "/images/hero_respirator.jpg",
-    badge: "Chemical Vapor & Particle Barrier",
-    indicativePriceInr: 3850,
-    hotspots: [
-      { label: "Anti-Fog Polycarbonate Visor", standard: "EN 166 Class 1 Optical & Impact", x: "48%", y: "30%" },
-      { label: "Dual Organic Vapor & Acid Gas Filters", standard: "A1B1E1K1-P3 Certified Rating", x: "28%", y: "65%" },
-      { label: "Hypoallergenic Silicone Seal", standard: "Hermetic Face Seal & Negative Pressure", x: "65%", y: "72%" },
-    ],
-    angles: [
-      { title: "Front Inspection", note: "Dual-cartridge containment check" },
-      { title: "Seal Profile", note: "Hypoallergenic silicone perimeter" },
-      { title: "Filter Matrix", note: "Organic vapor / acid gas barrier" },
-    ],
-  },
-  {
-    id: "helmet",
-    slug: "cap",
-    name: "High-Impact Safety Visor Helmet",
-    category: "Head & Face Impact Defense",
-    sku: "VS-PPE-001",
-    warehouseLocation: "WH-MAIN-01 • Bin A-14",
-    stockUnits: 1250,
-    standard: "ANSI/ISEA Z89.1 Type 1 Class E",
-    image: "/images/hero_helmet.jpg",
-    badge: "Mechanical Shock & Arc Flash Barrier",
-    indicativePriceInr: 1850,
-    hotspots: [
-      { label: "High-Density Polyethylene Shell", standard: "EN 397 Lateral Deformation Tested", x: "48%", y: "20%" },
-      { label: "Integrated Flip-Down Visor", standard: "ANSI Z87.1+ High-Velocity Protection", x: "46%", y: "54%" },
-      { label: "4-Point Ratchet Suspension", standard: "Kinetic Shock Absorption Harness", x: "68%", y: "65%" },
-    ],
-    angles: [
-      { title: "Front Visor", note: "High-velocity ballistic optical shield" },
-      { title: "Crown Stress", note: "Top-impact kinetic dispersion" },
-      { title: "Suspension Harness", note: "Micro-adjustable ergonomic cradle" },
-    ],
-  },
-  {
-    id: "gloves",
-    slug: "nitrile-gloves",
-    name: "Heavy-Duty Chemical Barrier Gloves",
-    category: "Hand & Forearm Chemical Protection",
-    sku: "VS-PPE-005",
-    warehouseLocation: "WH-MAIN-01 • Bin C-08",
-    stockUnits: 4300,
-    standard: "EN ISO 374-1:2016 Type A (AJKLPT)",
-    image: "/images/hero_gloves.jpg",
-    badge: "Solvent, Acid & Caustic Barrier",
-    indicativePriceInr: 420,
-    hotspots: [
-      { label: "Textured Diamond Grip", standard: "Wet/Oily Hydrocarbon Dexterity", x: "53%", y: "22%" },
-      { label: "Permeation Pressure Testing", standard: "AQL 0.65 Pinhole Leak Inspection", x: "32%", y: "52%" },
-      { label: "Extended 300mm Forearm Cuff", standard: "Splash & Immersion Protection", x: "74%", y: "64%" },
-    ],
-    angles: [
-      { title: "Permeation Rig", note: "Hydrostatic pinhole leak telemetry" },
-      { title: "Grip Micro-Structure", note: "Tactile diamond embossing" },
-      { title: "Gauntlet Cuff", note: "Forearm splash immersion overlap" },
-    ],
-  },
-  {
-    id: "hazardous",
-    slug: "caustic-soda",
-    name: "Hazardous Chemical Containment",
-    category: "Chemical Storage & Spill Control",
-    sku: "VS-CHM-011",
-    warehouseLocation: "WH-HAZMAT-02 • Spill Bay 1",
-    stockUnits: 180,
-    standard: "UN GHS Hazard Class 8 (Corrosive)",
-    image: "/images/hero_hazardous.jpg",
-    badge: "Secondary Containment & Spill Sump",
-    indicativePriceInr: 1250,
-    hotspots: [
-      { label: "Corrosion-Proof Storage Drums", standard: "UN 1H1/X1.8/250 Heavy Containment", x: "34%", y: "45%" },
-      { label: "High-Visibility Spill Sump Pallet", standard: "EPA 40 CFR 264.175 Compliant", x: "38%", y: "82%" },
-      { label: "GHS Hazard Identification Labels", standard: "Mandatory SDS Verification Gate", x: "55%", y: "58%" },
-    ],
-    angles: [
-      { title: "Spill Bay Overview", note: "Forklift accessible containment pallet" },
-      { title: "GHS Label Audit", note: "Class 8 corrosive hazard compliance" },
-      { title: "Ventilation Sump", note: "Vapor extraction containment" },
-    ],
-  },
-];
-
 export const HeroShowcase: React.FC = () => {
-  const [selectedProductIdx, setSelectedProductIdx] = useState<number>(0);
-  const [activeAngleIdx, setActiveAngleIdx] = useState<number>(0);
-  const [hoveredHotspot, setHoveredHotspot] = useState<number | null>(null);
-
-  const product = SHOWCASE_PRODUCTS[selectedProductIdx];
+  // Constellation particles for star twinkle & pop effects
+  const STAR_PARTICLES = [
+    { top: "5%", left: "7%", delay: 0.2, duration: 3.4, type: "star", size: "w-3.5 h-3.5" },
+    { top: "10%", left: "22%", delay: 1.4, duration: 4.2, type: "dot", size: "w-1.5 h-1.5" },
+    { top: "16%", left: "82%", delay: 0.8, duration: 3.6, type: "star", size: "w-3 h-3" },
+    { top: "7%", left: "92%", delay: 2.1, duration: 4.5, type: "star", size: "w-4 h-4" },
+    { top: "24%", left: "12%", delay: 2.7, duration: 3.2, type: "dot", size: "w-2 h-2" },
+    { top: "32%", left: "89%", delay: 1.1, duration: 3.9, type: "star", size: "w-3 h-3" },
+    { top: "42%", left: "4%", delay: 0.5, duration: 4.1, type: "star", size: "w-3.5 h-3.5" },
+    { top: "50%", left: "95%", delay: 2.3, duration: 3.5, type: "dot", size: "w-1.5 h-1.5" },
+    { top: "60%", left: "10%", delay: 1.6, duration: 4.0, type: "star", size: "w-3 h-3" },
+    { top: "68%", left: "85%", delay: 0.9, duration: 3.3, type: "dot", size: "w-2 h-2" },
+    { top: "78%", left: "6%", delay: 2.5, duration: 4.4, type: "star", size: "w-4 h-4" },
+    { top: "86%", left: "92%", delay: 1.2, duration: 3.7, type: "star", size: "w-3 h-3" },
+    { top: "20%", left: "38%", delay: 3.0, duration: 4.0, type: "dot", size: "w-1.5 h-1.5" },
+    { top: "36%", left: "62%", delay: 1.8, duration: 4.3, type: "dot", size: "w-1.5 h-1.5" },
+    { top: "55%", left: "28%", delay: 0.4, duration: 3.2, type: "dot", size: "w-2 h-2" },
+    { top: "65%", left: "72%", delay: 2.2, duration: 3.8, type: "star", size: "w-3 h-3" },
+    { top: "14%", left: "54%", delay: 1.7, duration: 3.5, type: "dot", size: "w-1.5 h-1.5" },
+    { top: "75%", left: "45%", delay: 2.9, duration: 4.2, type: "dot", size: "w-2 h-2" },
+  ];
 
   return (
-    <section className="relative pt-32 pb-16 px-4 md:px-6 overflow-hidden">
-      {/* Editorial Platform Branding Header */}
-      <div className="max-w-6xl mx-auto text-center mb-10">
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-zinc-900 text-white text-xs font-semibold mb-5 shadow-sm border border-zinc-700">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="tracking-wide">VERIFIED SAFETY & PRODUCT INTELLIGENCE PLATFORM</span>
-          <span className="hidden sm:inline text-zinc-400">&bull;</span>
-          <span className="hidden sm:inline text-zinc-300 font-mono text-[11px]">ZERO FABRICATED CLAIMS</span>
-        </div>
+    <section className="relative w-full bg-white overflow-hidden pt-8 pb-20 lg:pt-14 lg:pb-32 border-b border-slate-100">
+      {/* 1. Base Subtle Dot Grid Background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: "radial-gradient(#cbd5e1 1.25px, transparent 1.25px)",
+          backgroundSize: "24px 24px",
+          opacity: 0.75,
+        }}
+      />
 
-        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-zinc-950 uppercase leading-[0.98] max-w-5xl mx-auto">
-          Know Before{" "}
-          <span className="text-zinc-400 block sm:inline font-bold">You Use.</span>
-        </h1>
-
-        <p className="mt-4 text-sm sm:text-base md:text-lg text-zinc-800 font-semibold max-w-3xl mx-auto leading-relaxed">
-          &ldquo;Before you buy, use, store, or trust a product—know whether its information is verified.&rdquo;
-        </p>
-
-        <p className="mt-2 text-xs sm:text-sm text-zinc-500 max-w-2xl mx-auto leading-relaxed">
-          The unified specification registry, warehouse stock telemetry, and Digital Product Passport platform for consumers, factories, offices, hotels, hospitals, schools, cleaning crews & safety managers.
-        </p>
-
-        {/* Quick Navigation Pills */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5 mt-6">
-          <Link
-            href="/products"
-            className="px-4 py-2 rounded-full bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
+      {/* 2. Twinkling / Star Pop Animated Layer */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        {STAR_PARTICLES.map((particle, idx) => (
+          <div
+            key={idx}
+            className={`absolute ${
+              particle.type === "star" ? "animate-star-pop" : "animate-twinkle"
+            }`}
+            style={{
+              top: particle.top,
+              left: particle.left,
+              animationDelay: `${particle.delay}s`,
+              animationDuration: `${particle.duration}s`,
+            }}
           >
-            <span>Browse Master Catalogue (19 Items)</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-          <Link
-            href="/management"
-            className="px-4 py-2 rounded-full bg-white hover:bg-zinc-100 text-zinc-800 text-xs font-semibold transition-all border border-zinc-200 shadow-xs flex items-center gap-1.5"
-          >
-            <Warehouse className="w-3.5 h-3.5 text-zinc-600" />
-            <span>Warehouse Stock Balances</span>
-          </Link>
-          <Link
-            href="/safety"
-            className="px-4 py-2 rounded-full bg-white hover:bg-zinc-100 text-zinc-800 text-xs font-semibold transition-all border border-zinc-200 shadow-xs flex items-center gap-1.5"
-          >
-            <FileText className="w-3.5 h-3.5 text-zinc-600" />
-            <span>Safety Data Sheets (SDS)</span>
-          </Link>
-        </div>
+            {particle.type === "star" ? (
+              <svg
+                viewBox="0 0 24 24"
+                className={`${particle.size} fill-indigo-500/70 text-indigo-500 drop-shadow-[0_0_8px_rgba(99,102,241,0.65)]`}
+              >
+                <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" />
+              </svg>
+            ) : (
+              <div
+                className={`${particle.size} rounded-full bg-gradient-to-tr from-purple-400 to-indigo-500 shadow-[0_0_8px_rgba(168,85,247,0.7)]`}
+              />
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* Main Interactive Showcase Canvas */}
-      <div className="max-w-6xl mx-auto relative rounded-[2.5rem] bg-gradient-to-b from-zinc-100 via-zinc-150 to-zinc-200/80 p-4 sm:p-8 md:p-10 border border-zinc-300/80 shadow-inner">
-        {/* Equipment Selector Tabs */}
-        <div className="relative z-10 flex flex-col items-center mb-6">
-          <div className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2.5">
-            Select Flagship Industrial Safety Asset
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-full bg-white/95 border border-zinc-200/90 shadow-sm max-w-full">
-            {SHOWCASE_PRODUCTS.map((item, idx) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setSelectedProductIdx(idx);
-                  setActiveAngleIdx(0);
-                  setHoveredHotspot(null);
-                }}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold transition-all shrink-0 ${
-                  selectedProductIdx === idx
-                    ? "bg-zinc-950 text-white shadow-sm"
-                    : "text-zinc-700 hover:text-zinc-950 hover:bg-zinc-100"
-                }`}
-              >
-                <span>{item.name}</span>
-                <span
-                  className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
-                    selectedProductIdx === idx ? "bg-zinc-800 text-zinc-300" : "bg-zinc-100 text-zinc-500"
-                  }`}
-                >
-                  {item.sku}
-                </span>
-              </button>
-            ))}
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Constellation Header: Central Badge + Connector Rays + 4 Corner Pills */}
+        <div className="relative w-full max-w-4xl mx-auto min-h-[160px] flex items-center justify-center mb-4">
+          {/* Subtle Ambient Radial Back-Halo behind center badge */}
+          <div className="absolute w-44 h-44 rounded-full bg-gradient-to-tr from-indigo-200/50 via-purple-200/40 to-pink-200/30 blur-2xl animate-halo-pulse pointer-events-none" />
 
-          {/* Angle / Telemetry Toggle Sub-Buttons */}
-          <div className="flex items-center gap-2 mt-4">
-            {product.angles.map((angle, idx) => (
-              <button
-                key={angle.title}
-                onClick={() => setActiveAngleIdx(idx)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  activeAngleIdx === idx
-                    ? "bg-zinc-900 text-white shadow-xs font-semibold"
-                    : "bg-white/90 text-zinc-700 border border-zinc-200 hover:bg-white"
-                }`}
-              >
-                {angle.title}
-              </button>
-            ))}
-          </div>
-        </div>
+          {/* Responsive SVG Connector Rays (Desktop & Tablet >= 768px) */}
+          <svg
+            className="hidden md:block absolute inset-0 w-full h-full pointer-events-none z-0"
+            viewBox="0 0 900 160"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <defs>
+              <linearGradient id="rayGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#818cf8" stopOpacity="0.8" />
+                <stop offset="50%" stopColor="#cbd5e1" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#c084fc" stopOpacity="0.8" />
+              </linearGradient>
+            </defs>
 
-        {/* Telemetry & Compliance Verification Cards (Non-Overlapping Responsive Grid) */}
-        <div className="relative z-10 w-full max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6">
-          {/* Card 1: Real-Time Warehouse Telemetry */}
-          <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-zinc-200/90 shadow-sm flex items-start gap-3 transition-all hover:border-zinc-300">
-            <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
-              <Warehouse className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-zinc-950">Live Stock Telemetry</span>
-                <span className="text-[9px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
-                  100% Audit-Logged
-                </span>
-              </div>
-              <p className="text-[11px] text-zinc-600 mt-1 leading-snug">
-                All movements in <strong className="text-zinc-900 font-mono">{product.warehouseLocation}</strong> require recorded justification.
-              </p>
-              <div className="mt-2 text-[10px] font-mono px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-800 border border-zinc-200 inline-block font-semibold">
-                Available: <span className="text-emerald-700 font-bold">{product.stockUnits.toLocaleString()} units</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2: Zero-Hallucination Policy Gate */}
-          <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-zinc-200/90 shadow-sm flex items-start gap-3 transition-all hover:border-zinc-300">
-            <div className="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-zinc-950">Zero-Hallucination Policy</span>
-                <span className="text-[9px] font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                  Strict Verification Gate
-                </span>
-              </div>
-              <p className="text-[11px] text-zinc-600 mt-1 leading-snug">
-                Chemical hazards and standards are never assumed. Unverified items remain strictly labeled <strong className="text-zinc-900">DRAFT</strong>.
-              </p>
-              <div className="mt-2 text-[10px] font-mono px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200 inline-block font-semibold">
-                Standard: <span className="font-bold">{product.standard}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Central High-Definition Equipment Showcase Stage */}
-        <div className="relative z-10 flex flex-col items-center justify-center">
-
-          {/* Main Equipment Image Stage Card */}
-          <div className="relative w-full max-w-3xl aspect-[16/10] sm:aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl border-4 border-zinc-800/20 bg-zinc-950 group">
-            {/* High-Resolution Industrial Equipment Photo */}
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+            {/* Ray to Top-Left Pill (PPE Barrier) */}
+            <path
+              d="M 410 65 L 200 45"
+              stroke="url(#rayGradient)"
+              strokeWidth="1.5"
+              strokeDasharray="4 4"
+              className="animate-ray-pulse"
             />
+            <circle cx="200" cy="45" r="3" fill="#6366f1" />
 
-            {/* Subtle Gradient Overlays for High-Tech Contrast */}
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/20 to-transparent pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/40 via-transparent to-zinc-950/30 pointer-events-none" />
+            {/* Ray to Bottom-Left Pill (SDS Verified) */}
+            <path
+              d="M 410 95 L 210 120"
+              stroke="url(#rayGradient)"
+              strokeWidth="1.5"
+              strokeDasharray="4 4"
+              className="animate-ray-pulse"
+            />
+            <circle cx="210" cy="120" r="3" fill="#7c3aed" />
 
-            {/* Corner Industrial Telemetry Brackets */}
-            <div className="absolute top-4 left-4 text-[10px] font-mono text-white/70 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/20">
-              HUD &bull; {product.angles[activeAngleIdx].note}
+            {/* Ray to Top-Right Pill (Audit Trail) */}
+            <path
+              d="M 490 65 L 700 45"
+              stroke="url(#rayGradient)"
+              strokeWidth="1.5"
+              strokeDasharray="4 4"
+              className="animate-ray-pulse"
+            />
+            <circle cx="700" cy="45" r="3" fill="#6366f1" />
+
+            {/* Ray to Bottom-Right Pill (Telemetry) */}
+            <path
+              d="M 490 95 L 690 120"
+              stroke="url(#rayGradient)"
+              strokeWidth="1.5"
+              strokeDasharray="4 4"
+              className="animate-ray-pulse"
+            />
+            <circle cx="690" cy="120" r="3" fill="#9333ea" />
+
+            {/* Secondary subtle ambient rays fanning out */}
+            <path
+              d="M 410 80 L 260 80"
+              stroke="#e2e8f0"
+              strokeWidth="1"
+              strokeDasharray="3 3"
+              opacity="0.6"
+            />
+            <circle cx="260" cy="80" r="2" fill="#94a3b8" />
+
+            <path
+              d="M 490 80 L 640 80"
+              stroke="#e2e8f0"
+              strokeWidth="1"
+              strokeDasharray="3 3"
+              opacity="0.6"
+            />
+            <circle cx="640" cy="80" r="2" fill="#94a3b8" />
+          </svg>
+
+          {/* Floating Pill 1: Top-Left (PPE Barrier) */}
+          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/95 backdrop-blur-sm border border-slate-200/90 shadow-lg shadow-slate-200/50 absolute left-4 lg:left-12 top-6 z-10 transition-transform hover:scale-105 duration-200">
+            <span className="text-xs font-semibold text-slate-800 tracking-tight">
+              PPE Barrier
+            </span>
+            <div className="w-6 h-6 rounded-md bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+              🛡️
             </div>
+          </div>
 
-            <div className="absolute top-4 right-4 flex items-center gap-1.5 text-[10px] font-mono text-emerald-300 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/20">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>TELEMETRY ACTIVE</span>
+          {/* Floating Pill 2: Bottom-Left (SDS Verified) */}
+          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/95 backdrop-blur-sm border border-slate-200/90 shadow-lg shadow-slate-200/50 absolute left-8 lg:left-16 bottom-4 z-10 transition-transform hover:scale-105 duration-200">
+            <span className="text-xs font-semibold text-slate-800 tracking-tight">
+              SDS Verified
+            </span>
+            <div className="w-6 h-6 rounded-md bg-purple-600 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+              ⚡
             </div>
+          </div>
 
-            {/* Interactive Hotspot Pins */}
-            {product.hotspots.map((hotspot, idx) => (
-              <div
-                key={hotspot.label}
-                style={{ left: hotspot.x, top: hotspot.y }}
-                className="absolute z-30 transform -translate-x-1/2 -translate-y-1/2"
-              >
-                <button
-                  onClick={() => setHoveredHotspot(hoveredHotspot === idx ? null : idx)}
-                  onMouseEnter={() => setHoveredHotspot(idx)}
-                  onMouseLeave={() => setHoveredHotspot(null)}
-                  className="relative group/pin focus:outline-none"
-                  aria-label={hotspot.label}
-                >
-                  <span className="absolute -inset-2 rounded-full bg-amber-400/40 animate-ping" />
-                  <div className="w-6 h-6 rounded-full bg-amber-500 text-zinc-950 font-bold text-[10px] flex items-center justify-center shadow-lg border-2 border-white transition-transform group-hover/pin:scale-125">
-                    {idx + 1}
-                  </div>
+          {/* Central Logo Badge with Polished Vector SVG */}
+          <div className="relative z-20 w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-white border border-slate-200 shadow-xl shadow-indigo-100/60 flex items-center justify-center transition-all hover:scale-105 duration-300 group">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white via-white to-slate-50 pointer-events-none" />
+            
+            {/* Custom Modern Geometric Logo Mark */}
+            <svg
+              className="relative z-10 w-12 h-12 text-indigo-600 group-hover:scale-110 transition-transform duration-300 drop-shadow-sm"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="qusoGlyphGrad" x1="8" y1="6" x2="40" y2="42" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#4f46e5" />
+                  <stop offset="50%" stopColor="#6366f1" />
+                  <stop offset="100%" stopColor="#8b5cf6" />
+                </linearGradient>
+                <linearGradient id="dotGrad" x1="18" y1="15" x2="28" y2="25" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#6366f1" />
+                  <stop offset="100%" stopColor="#a855f7" />
+                </linearGradient>
+              </defs>
+              {/* Outer sleek 'q' circular aperture */}
+              <circle
+                cx="23"
+                cy="20"
+                r="11"
+                stroke="url(#qusoGlyphGrad)"
+                strokeWidth="4.5"
+                strokeLinecap="round"
+              />
+              {/* Descender stem extending down with modern rounded terminal */}
+              <path
+                d="M34 11V34C34 38.4 30.6 41.5 26.5 41.5H23"
+                stroke="url(#qusoGlyphGrad)"
+                strokeWidth="4.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Central focal core point */}
+              <circle cx="23" cy="20" r="4.2" fill="url(#dotGrad)" />
+            </svg>
+          </div>
 
-                  {/* Hotspot Tooltip */}
-                  {hoveredHotspot === idx && (
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-52 p-2.5 rounded-xl bg-zinc-950/95 backdrop-blur-md text-white border border-white/20 shadow-2xl z-40">
-                      <div className="text-[11px] font-bold text-amber-300">{hotspot.label}</div>
-                      <div className="text-[10px] text-zinc-300 font-mono mt-0.5">{hotspot.standard}</div>
-                    </div>
-                  )}
-                </button>
+          {/* Floating Pill 3: Top-Right (Audit Trail) */}
+          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/95 backdrop-blur-sm border border-slate-200/90 shadow-lg shadow-slate-200/50 absolute right-4 lg:right-12 top-6 z-10 transition-transform hover:scale-105 duration-200">
+            <div className="w-6 h-6 rounded-md bg-purple-900 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+              📋
+            </div>
+            <span className="text-xs font-semibold text-slate-800 tracking-tight">
+              Audit Trail
+            </span>
+          </div>
+
+          {/* Floating Pill 4: Bottom-Right (Telemetry) */}
+          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/95 backdrop-blur-sm border border-slate-200/90 shadow-lg shadow-slate-200/50 absolute right-8 lg:right-16 bottom-4 z-10 transition-transform hover:scale-105 duration-200">
+            <div className="w-6 h-6 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+              📊
+            </div>
+            <span className="text-xs font-semibold text-slate-800 tracking-tight">
+              Telemetry
+            </span>
+          </div>
+        </div>
+
+        {/* Mobile Chips (Visible only < 768px) */}
+        <div className="flex md:hidden flex-wrap items-center justify-center gap-2 mb-6 px-2">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-800 shadow-xs">
+            🛡️ PPE Barrier
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-800 shadow-xs">
+            ⚡ SDS Verified
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-800 shadow-xs">
+            📋 Audit Trail
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-800 shadow-xs">
+            📊 Telemetry
+          </span>
+        </div>
+
+        {/* Main Headline */}
+        <div className="text-center max-w-4xl mx-auto space-y-4">
+
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-slate-900 leading-[1.15] font-sans">
+            World&apos;s First AI-Powered
+            <span className="block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] via-[#7c3aed] to-[#8b5cf6]">
+              Inventory &amp; Review Co-Pilot
+            </span>
+          </h1>
+
+          {/* Subheading */}
+          <div className="text-slate-600 text-sm sm:text-base font-normal max-w-xl mx-auto leading-relaxed space-y-0.5">
+            <p>Industrial intelligence that verifies, tracks, and audits all in one place.</p>
+            <p className="font-semibold text-slate-800">100% Verified Specifications. Automated.</p>
+          </div>
+
+          {/* Social Proof Avatars */}
+          <div className="pt-2 flex items-center justify-center gap-3">
+            <div className="flex -space-x-2">
+              <img
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80&q=80"
+                alt="Auditor"
+                className="w-7 h-7 rounded-full border-2 border-white object-cover"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80&q=80"
+                alt="Auditor"
+                className="w-7 h-7 rounded-full border-2 border-white object-cover"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=80&h=80&q=80"
+                alt="Auditor"
+                className="w-7 h-7 rounded-full border-2 border-white object-cover"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&h=80&q=80"
+                alt="Auditor"
+                className="w-7 h-7 rounded-full border-2 border-white object-cover"
+              />
+            </div>
+            <span className="text-xs sm:text-sm font-semibold text-slate-700">
+              4M+ trusted users
+            </span>
+          </div>
+
+          {/* Exact Purple Primary CTA Button */}
+          <div className="pt-4 flex flex-col items-center gap-2">
+            <Link
+              href="/#datasheet"
+              className="px-8 py-3.5 rounded-xl bg-[#6366f1] hover:bg-[#4f46e5] text-white text-base font-bold shadow-[0_12px_28px_-6px_rgba(99,102,241,0.55)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Get Started for Free
+            </Link>
+            <span className="text-xs text-slate-500">No credit card required.</span>
+          </div>
+        </div>
+
+        {/* Floating UI Mockup Showcase (Exact composition from Reference Image) */}
+        <div className="mt-14 lg:mt-20 relative min-h-[380px] lg:min-h-[440px]">
+          {/* Mobile Stacking Grid (< 1024px) / Absolute Layout (>= 1024px) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:block gap-6 max-w-6xl mx-auto">
+            {/* 1. BOTTOM LEFT: Video Editor / Product Studio Window */}
+            <div className="lg:absolute lg:left-0 lg:bottom-12 w-full lg:w-[300px] xl:w-[320px] rounded-2xl bg-white border border-slate-200/90 shadow-2xl overflow-hidden z-10 transition-transform hover:-translate-y-1">
+              <div className="px-3.5 py-2.5 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500">
+                <span className="font-semibold text-slate-700 flex items-center gap-1.5">
+                  <Video className="w-3.5 h-3.5 text-indigo-600" />
+                  AI Spec Studio
+                </span>
+                <span className="px-2 py-0.5 rounded bg-purple-100 text-purple-700 font-bold text-[10px]">
+                  Draft
+                </span>
               </div>
-            ))}
-
-            {/* Bottom Floating Telemetry Overlay */}
-            <div className="absolute bottom-4 inset-x-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 z-20">
-              <div className="p-3 sm:p-4 rounded-2xl bg-black/75 backdrop-blur-md border border-white/15 text-white max-w-md">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">
-                    {product.sku}
-                  </span>
-                  <span className="text-xs text-zinc-300 font-mono">{product.warehouseLocation}</span>
+              <div className="p-3 bg-slate-900 relative h-36 flex items-center justify-center overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=400&q=80"
+                  alt="Full-face respirator"
+                  className="w-full h-full object-cover opacity-80"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-white/90 text-slate-900 flex items-center justify-center shadow-lg">
+                    <Play className="w-4 h-4 fill-slate-900 ml-0.5" />
+                  </div>
                 </div>
-                <h3 className="text-sm sm:text-base font-bold text-white">{product.name}</h3>
-                <p className="text-[11px] text-zinc-300 mt-0.5 font-mono">
-                  Certification: <strong className="text-white">{product.standard}</strong>
+                <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[10px] text-white font-mono bg-black/60 px-2 py-0.5 rounded backdrop-blur-xs">
+                  <span>00:04 / 00:30</span>
+                  <span>EN 136 Barrier</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. BOTTOM LEFT OVERLAY: Captions / Style Modal (Tilted slightly) */}
+            <div className="lg:absolute lg:left-16 xl:left-24 lg:bottom-0 w-full lg:w-[270px] xl:w-[290px] rounded-2xl bg-white border border-slate-200 shadow-2xl p-4 z-20 transition-transform hover:rotate-0 lg:-rotate-2">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 text-xs font-bold text-slate-800">
+                <span className="text-slate-900">Captions</span>
+                <span className="text-slate-400 font-normal">Style</span>
+              </div>
+              <div className="mt-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100 space-y-1 text-xs">
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                  <span>00:00:07:000 - 00:00:12:000</span>
+                  <Trash2 className="w-3 h-3 text-red-400" />
+                </div>
+                <p className="text-[11px] font-medium text-slate-700">
+                  To begin with, though, just make sure that barrier seals are verified.
                 </p>
               </div>
-
-              <Link
-                href={`/products/${product.slug}`}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white hover:bg-zinc-100 text-zinc-950 text-xs font-bold shadow-xl transition-all hover:gap-3 shrink-0"
-              >
-                <span>Inspect Full Specs & Stock</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Lower Row: Floating Dark Card (Left) + Live Statistics (Right) */}
-        <div className="relative z-20 grid grid-cols-1 md:grid-cols-3 gap-6 items-end mt-8">
-          {/* Floating Dark Card - Visora Style */}
-          <div className="md:col-span-2 p-6 md:p-8 rounded-3xl bg-[#0d0d11]/95 backdrop-blur-xl text-white border border-white/10 shadow-2xl">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
-                Enterprise Verification Infrastructure
-              </span>
-              <span className="text-xs text-zinc-500">&bull;</span>
-              <span className="text-[11px] text-zinc-400 font-mono">Non-E-Commerce Platform</span>
-            </div>
-            <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white">
-              Traceable product specifications, chemical hazard gates, and physical inventory control.
-            </h3>
-            <p className="mt-2 text-xs md:text-sm text-zinc-400 leading-relaxed max-w-xl">
-              Engineered specifically for plant safety officers, EHS directors, and inventory controllers. We do not sell items or process payments. All external purchase references link directly to verified manufacturer distributors.
-            </p>
-
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-white text-zinc-950 font-semibold text-xs shadow-lg hover:bg-zinc-100 transition-all group"
-              >
-                <span>Explore 19 Master Products</span>
-                <div className="w-5 h-5 rounded-full bg-zinc-950 text-white flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
-                  <ArrowRight className="w-3 h-3" />
-                </div>
-              </Link>
-
-              <Link
-                href="/compare"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/10 text-white text-xs font-semibold hover:bg-white/20 transition-colors border border-white/10"
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                <span>Compare Specs Side-by-Side</span>
-              </Link>
-
-              <Link
-                href="/management"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/10 text-white text-xs font-semibold hover:bg-white/20 transition-colors border border-white/10"
-              >
-                <Warehouse className="w-3.5 h-3.5" />
-                <span>Management Portal</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Right Column: Key Operational Statistics & Live Mini Card */}
-          <div className="flex flex-col gap-4">
-            {/* Stats Counter 1 */}
-            <div className="p-5 rounded-2xl bg-white/95 backdrop-blur-md border border-zinc-200/80 shadow-xs flex items-center justify-between">
-              <div>
-                <div className="text-3xl font-black tracking-tight text-zinc-950">19</div>
-                <div className="text-xs text-zinc-600 font-medium">Initial Master Products</div>
-              </div>
-              <div className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-800 font-bold border border-zinc-200">
-                10 PPE &bull; 9 Chem
+              <div className="mt-2 text-[10px] font-mono text-slate-400 flex items-center justify-between">
+                <span>00:00:12:000 - 00:00:32:000</span>
+                <Trash2 className="w-3 h-3 text-red-300" />
               </div>
             </div>
 
-            {/* Stats Counter 2 */}
-            <div className="p-5 rounded-2xl bg-white/95 backdrop-blur-md border border-zinc-200/80 shadow-xs flex items-center justify-between">
-              <div>
-                <div className="text-3xl font-black tracking-tight text-zinc-950">100%</div>
-                <div className="text-xs text-zinc-600 font-medium">Audit-Logged Stock Moves</div>
-              </div>
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Immutable</span>
-              </div>
-            </div>
-
-            {/* Mini Product Pill - Quick Access */}
-            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-zinc-200/90 shadow-md flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl overflow-hidden border border-zinc-200 shrink-0">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-zinc-900">{product.name}</div>
-                  <div className="text-[11px] text-zinc-500 font-mono">{product.sku} &bull; ₹{product.indicativePriceInr}</div>
+            {/* 3. BOTTOM CENTER: Floating Platform 3D Tiles in an Arc */}
+            <div className="md:col-span-2 lg:col-span-1 lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:bottom-2 flex items-center justify-center gap-3 z-20 py-4 lg:py-0">
+              {/* Tile 1: YouTube */}
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 shadow-xl flex items-center justify-center hover:-translate-y-1.5 transition-transform duration-200 cursor-pointer group">
+                <div className="w-7 h-5 rounded bg-red-600 text-white flex items-center justify-center">
+                  <Play className="w-3 h-3 fill-white ml-0.5" />
                 </div>
               </div>
-              <Link
-                href={`/products/${product.slug}`}
-                className="w-8 h-8 rounded-full bg-zinc-950 text-white flex items-center justify-center hover:bg-zinc-800 transition-colors"
-                title="View product details"
-              >
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Industrial Safety & Regulatory Standards Ticker */}
-      <div className="max-w-6xl mx-auto mt-8 pt-6 border-t border-zinc-200/80">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 shrink-0">
-            Regulated Verification Standards:
-          </span>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-zinc-600 font-medium">
-            <span className="px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-800 text-[11px] font-mono">
-              🛡️ OSHA 1910.134 Respiratory
-            </span>
-            <span className="px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-800 text-[11px] font-mono">
-              🧪 EN ISO 374-1 Chemical Barrier
-            </span>
-            <span className="px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-800 text-[11px] font-mono">
-              👁️ ANSI/ISEA Z87.1 Impact Eye
-            </span>
-            <span className="px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-800 text-[11px] font-mono">
-              📑 UN GHS 16-Section SDS
-            </span>
-            <span className="px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-800 text-[11px] font-mono">
-              🏢 ISO 45001 Health & Safety
-            </span>
+              {/* Tile 2: TikTok */}
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 shadow-xl flex items-center justify-center hover:-translate-y-1.5 transition-transform duration-200 cursor-pointer group">
+                <div className="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center text-xs font-black">
+                  ♫
+                </div>
+              </div>
+
+              {/* Tile 3: Instagram */}
+              <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 shadow-2xl flex items-center justify-center hover:-translate-y-2 transition-transform duration-200 cursor-pointer group -translate-y-2">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white flex items-center justify-center text-xs font-bold shadow-inner">
+                  📸
+                </div>
+              </div>
+
+              {/* Tile 4: LinkedIn */}
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 shadow-xl flex items-center justify-center hover:-translate-y-1.5 transition-transform duration-200 cursor-pointer group">
+                <div className="w-7 h-7 rounded bg-[#0077b5] text-white flex items-center justify-center text-xs font-bold">
+                  in
+                </div>
+              </div>
+
+              {/* Tile 5: X / Twitter */}
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 shadow-xl flex items-center justify-center hover:-translate-y-1.5 transition-transform duration-200 cursor-pointer group">
+                <div className="w-7 h-7 rounded bg-black text-white flex items-center justify-center text-xs font-black">
+                  𝕏
+                </div>
+              </div>
+            </div>
+
+            {/* 4. BOTTOM RIGHT: Calendar Schedule Grid Card */}
+            <div className="lg:absolute lg:right-0 lg:bottom-12 w-full lg:w-[300px] xl:w-[320px] rounded-2xl bg-white border border-slate-200 shadow-2xl p-4 z-10 transition-transform hover:-translate-y-1">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-900">July 2026</span>
+                  <div className="flex items-center gap-1 text-slate-400">
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold text-[10px]">
+                  Today
+                </span>
+              </div>
+
+              {/* Calendar Grid Rows */}
+              <div className="grid grid-cols-3 gap-2 mt-3 text-[10px]">
+                <div className="p-2 rounded-xl bg-purple-50/70 border border-purple-100 text-purple-900 space-y-1">
+                  <span className="font-bold block">11:00 AM</span>
+                  <p className="truncate text-[9px] text-purple-700">Audit Batch #44</p>
+                  <span className="inline-block w-full h-8 rounded bg-purple-200/50" />
+                </div>
+                <div className="p-2 rounded-xl bg-indigo-50/70 border border-indigo-100 text-indigo-900 space-y-1">
+                  <span className="font-bold block">02:30 PM</span>
+                  <p className="truncate text-[9px] text-indigo-700">SDS Review</p>
+                  <span className="inline-block w-full h-8 rounded bg-indigo-200/50" />
+                </div>
+                <div className="p-2 rounded-xl bg-emerald-50/70 border border-emerald-100 text-emerald-900 space-y-1">
+                  <span className="font-bold block">05:00 PM</span>
+                  <p className="truncate text-[9px] text-emerald-700">Restock Dispatch</p>
+                  <span className="inline-block w-full h-8 rounded bg-emerald-200/50" />
+                </div>
+              </div>
+            </div>
+
+            {/* 5. BOTTOM RIGHT OVERLAY: Post Inspector Card (Tilted slightly) */}
+            <div className="lg:absolute lg:right-16 xl:right-24 lg:bottom-0 w-full lg:w-[255px] xl:w-[270px] rounded-2xl bg-white border border-slate-200 shadow-2xl p-4 z-20 transition-transform hover:rotate-0 lg:rotate-2">
+              <div className="flex gap-2.5 items-start">
+                <img
+                  src="https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=160&q=80"
+                  alt="Nitrile gloves"
+                  className="w-16 h-16 rounded-xl object-cover border border-slate-100 shrink-0"
+                />
+                <div className="min-w-0 space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                    Inspect Specs
+                  </span>
+                  <h4 className="text-xs font-bold text-slate-900 truncate">
+                    Nitrile Barrier Gloves
+                  </h4>
+                  <span className="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded font-semibold inline-block">
+                    AQL 1.5 Verified
+                  </span>
+                </div>
+              </div>
+              <div className="mt-3 pt-2.5 border-t border-slate-100 space-y-1.5 text-[10px] text-slate-500">
+                <div className="flex justify-between">
+                  <span>Standard</span>
+                  <strong className="text-slate-800">EN ISO 374-1</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Breakthrough</span>
+                  <strong className="text-slate-800">&gt; 480 mins</strong>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

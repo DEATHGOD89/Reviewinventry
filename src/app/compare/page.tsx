@@ -68,7 +68,7 @@ function CompareContent() {
   };
 
   return (
-    <div className="pt-28 pb-24 px-6 max-w-7xl mx-auto">
+    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-10 pb-6 border-b border-zinc-200">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 text-zinc-800 text-xs font-semibold mb-2">

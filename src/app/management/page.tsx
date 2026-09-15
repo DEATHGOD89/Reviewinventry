@@ -195,7 +195,7 @@ export default function ManagementPortalPage() {
   };
 
   return (
-    <div className="pt-28 pb-24 px-6 max-w-7xl mx-auto space-y-8">
+    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
       {/* Top Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-zinc-200">
         <div>

@@ -42,42 +42,39 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Catalogue", href: "/products" },
+    { name: "Products", href: "/products" },
+    { name: "Datasheet", href: "/#datasheet" },
     { name: "Compare", href: "/compare" },
     { name: "Reviews", href: "/reviews" },
-    { name: "Glossary", href: "/glossary" },
-    { name: "Safety Info", href: "/safety" },
+    { name: "Safety & SDS", href: "/safety" },
   ];
 
   return (
     <>
-      <header className="fixed top-5 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
-        <div className="w-full max-w-6xl pointer-events-auto flex items-center justify-between">
-          {/* Brand Logo - Visora style */}
-          <Link
-            href="/"
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white/85 backdrop-blur-md border border-zinc-200 shadow-xs hover:border-zinc-300 transition-all group"
-          >
-            <BrandLogo variant="dark" className="w-6 h-6 rounded-lg group-hover:scale-105 transition-transform" />
-            <span className="font-bold tracking-tight text-sm text-zinc-950">VERISPEC</span>
-            <span className="text-[10px] tracking-wider uppercase px-1.5 py-0.5 rounded-md bg-zinc-100 text-zinc-600 font-semibold">
-              INTEL
+      <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+          {/* Exact Quso.ai Logo styling */}
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-black text-white flex items-center justify-center font-bold text-base shadow-sm group-hover:scale-105 transition-transform">
+              <span className="font-sans font-black tracking-tighter">v</span>
+            </div>
+            <span className="font-black text-xl tracking-tight text-slate-900 font-sans">
+              verispec<span className="text-slate-400">.ai</span>
             </span>
           </Link>
 
-          {/* Centered Pill Nav */}
-          <nav className="hidden md:flex items-center gap-1 px-4 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-zinc-200/90 shadow-xs">
+          {/* Centered Clean Nav Links */}
+          <nav className="hidden md:flex items-center gap-7 lg:gap-8">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  className={`text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-zinc-900 text-white shadow-xs"
-                      : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100/80"
+                      ? "text-indigo-600 font-semibold"
+                      : "text-slate-600 hover:text-slate-950"
                   }`}
                 >
                   {link.name}
@@ -86,42 +83,33 @@ export const Navbar: React.FC = () => {
             })}
           </nav>
 
-          {/* Right Action Icons & Portal Access */}
-          <div className="flex items-center gap-2">
+          {/* Right Action Buttons */}
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setSearchModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/85 backdrop-blur-md border border-zinc-200 text-zinc-700 hover:text-zinc-950 hover:bg-white shadow-xs transition-colors"
-              title="Search catalogue (Ctrl+K)"
+              className="p-2 text-slate-500 hover:text-slate-900 transition-colors hidden sm:flex items-center gap-1.5 text-xs"
+              title="Search (Ctrl+K)"
             >
-              <Search className="w-3.5 h-3.5" />
-              <span className="hidden lg:inline text-xs text-zinc-400">Search</span>
-              <kbd className="hidden lg:inline text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 border border-zinc-200">
-                ⌘K
-              </kbd>
+              <Search className="w-4 h-4" />
             </button>
 
+            {/* Exact Login outline button */}
             <Link
-              href="/compare"
-              className="p-2.5 rounded-full bg-white/85 backdrop-blur-md border border-zinc-200 text-zinc-700 hover:text-zinc-950 hover:bg-white shadow-xs transition-colors hidden sm:flex"
-              title="Compare Products"
+              href="/login"
+              className="px-5 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-50 text-sm font-medium transition-all"
             >
-              <SlidersHorizontal className="w-4 h-4" />
+              Login
             </Link>
 
-            {/* Desktop Portals Dropdown */}
-            <div className="relative hidden md:block" ref={portalRef}>
+            {/* Exact Get Started purple button */}
+            <div className="relative" ref={portalRef}>
               <button
                 type="button"
                 onClick={() => setPortalMenuOpen((prev) => !prev)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-950 text-white text-xs font-semibold shadow-xs hover:bg-zinc-850 transition-all group"
+                className="px-5 py-1.5 rounded-xl bg-[#6366f1] hover:bg-[#4f46e5] text-white text-sm font-semibold shadow-[0_6px_20px_-4px_rgba(99,102,241,0.5)] transition-all flex items-center gap-1.5"
               >
-                <User className="w-3.5 h-3.5 text-zinc-300" />
-                <span>Portals</span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
-                    portalMenuOpen ? "rotate-180 text-white" : "group-hover:translate-y-0.5"
-                  }`}
-                />
+                <span>Get Started</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${portalMenuOpen ? "rotate-180" : ""}`} />
               </button>
 
               {portalMenuOpen && (

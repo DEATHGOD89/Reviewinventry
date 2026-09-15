@@ -36,8 +36,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased scroll-smooth">
-      <body className="min-h-full flex flex-col bg-[#f7f7f9] text-zinc-900 selection:bg-zinc-900 selection:text-white">
+    <html lang="en" data-scroll-behavior="smooth" className="h-full antialiased scroll-smooth">
+      <body className="min-h-full flex flex-col bg-white text-slate-900 selection:bg-indigo-600 selection:text-white">
         <OfflineStatusBar />
         <Navbar />
         <main className="flex-1">{children}</main>

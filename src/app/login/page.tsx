@@ -57,7 +57,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="pt-32 pb-24 px-6 max-w-md mx-auto">
+    <div className="py-12 px-4 max-w-md mx-auto">
       <div className="rounded-3xl bg-white border border-zinc-200 shadow-xl p-8 space-y-6">
         <div className="text-center space-y-2">
           <BrandLogo variant="dark" className="w-14 h-14 rounded-2xl mx-auto shadow-md" />

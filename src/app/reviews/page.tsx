@@ -89,7 +89,7 @@ export default function ReviewsPage() {
   };
 
   return (
-    <div className="pt-28 pb-24 px-6 max-w-5xl mx-auto">
+    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
       {/* Header Banner */}
       <div className="mb-8 pb-6 border-b border-zinc-200 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
