@@ -197,17 +197,19 @@ body {
 }
 
 /* Forcibly hide Netlify injected preview drawers, feedback badges & 'Powered by Netlify' tags */
+iframe,
+netlify-badge,
 #netlify-preview-drawer,
 iframe#netlify-drawer,
 iframe[src*="netlify"],
 [data-netlify-deploy-preview],
 .netlify-identity-widget,
-[id*="netlify"],
-[class*="netlify"],
-[data-testid*="netlify"],
-[aria-label*="Netlify"],
-a[href*="netlify.com"],
-a[href*="netlify.app"] {
+[id*="netlify" i],
+[class*="netlify" i],
+[data-testid*="netlify" i],
+[aria-label*="Netlify" i],
+a[href*="netlify.com" i],
+a[href*="netlify.app" i] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -215,5 +217,6 @@ a[href*="netlify.app"] {
   width: 0 !important;
   height: 0 !important;
   position: absolute !important;
-  z-index: -9999 !important;
+  z-index: -99999 !important;
 }
+
