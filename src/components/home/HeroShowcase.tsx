@@ -21,67 +21,43 @@ import {
 } from "lucide-react";
 
 export const HeroShowcase: React.FC = () => {
-  // Constellation particles for star twinkle & pop effects
-  const STAR_PARTICLES = [
-    { top: "5%", left: "7%", delay: 0.2, duration: 3.4, type: "star", size: "w-3.5 h-3.5" },
-    { top: "10%", left: "22%", delay: 1.4, duration: 4.2, type: "dot", size: "w-1.5 h-1.5" },
-    { top: "16%", left: "82%", delay: 0.8, duration: 3.6, type: "star", size: "w-3 h-3" },
-    { top: "7%", left: "92%", delay: 2.1, duration: 4.5, type: "star", size: "w-4 h-4" },
-    { top: "24%", left: "12%", delay: 2.7, duration: 3.2, type: "dot", size: "w-2 h-2" },
-    { top: "32%", left: "89%", delay: 1.1, duration: 3.9, type: "star", size: "w-3 h-3" },
-    { top: "42%", left: "4%", delay: 0.5, duration: 4.1, type: "star", size: "w-3.5 h-3.5" },
-    { top: "50%", left: "95%", delay: 2.3, duration: 3.5, type: "dot", size: "w-1.5 h-1.5" },
-    { top: "60%", left: "10%", delay: 1.6, duration: 4.0, type: "star", size: "w-3 h-3" },
-    { top: "68%", left: "85%", delay: 0.9, duration: 3.3, type: "dot", size: "w-2 h-2" },
-    { top: "78%", left: "6%", delay: 2.5, duration: 4.4, type: "star", size: "w-4 h-4" },
-    { top: "86%", left: "92%", delay: 1.2, duration: 3.7, type: "star", size: "w-3 h-3" },
-    { top: "20%", left: "38%", delay: 3.0, duration: 4.0, type: "dot", size: "w-1.5 h-1.5" },
-    { top: "36%", left: "62%", delay: 1.8, duration: 4.3, type: "dot", size: "w-1.5 h-1.5" },
-    { top: "55%", left: "28%", delay: 0.4, duration: 3.2, type: "dot", size: "w-2 h-2" },
-    { top: "65%", left: "72%", delay: 2.2, duration: 3.8, type: "star", size: "w-3 h-3" },
-    { top: "14%", left: "54%", delay: 1.7, duration: 3.5, type: "dot", size: "w-1.5 h-1.5" },
-    { top: "75%", left: "45%", delay: 2.9, duration: 4.2, type: "dot", size: "w-2 h-2" },
+  // Delicate twinkling sparkle stars for ambient depth (zero background dots)
+  const SPARKLE_STARS = [
+    { top: "6%", left: "8%", delay: 0.2, duration: 3.4, size: "w-3.5 h-3.5" },
+    { top: "16%", left: "82%", delay: 0.8, duration: 3.6, size: "w-3 h-3" },
+    { top: "8%", left: "92%", delay: 2.1, duration: 4.5, size: "w-4 h-4" },
+    { top: "32%", left: "88%", delay: 1.1, duration: 3.9, size: "w-3 h-3" },
+    { top: "42%", left: "5%", delay: 0.5, duration: 4.1, size: "w-3.5 h-3.5" },
+    { top: "60%", left: "10%", delay: 1.6, duration: 4.0, size: "w-3 h-3" },
+    { top: "78%", left: "6%", delay: 2.5, duration: 4.4, size: "w-4 h-4" },
+    { top: "86%", left: "92%", delay: 1.2, duration: 3.7, size: "w-3 h-3" },
+    { top: "65%", left: "72%", delay: 2.2, duration: 3.8, size: "w-3 h-3" },
   ];
 
   return (
     <section className="relative w-full bg-white overflow-hidden pt-8 pb-20 lg:pt-14 lg:pb-32 border-b border-slate-100">
-      {/* 1. Base Subtle Dot Grid Background */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: "radial-gradient(#cbd5e1 1.25px, transparent 1.25px)",
-          backgroundSize: "24px 24px",
-          opacity: 0.75,
-        }}
-      />
+      {/* 1. Subtle Ambient Soft Mesh Backdrop (Clean, no background dots) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-50/60 via-white to-white pointer-events-none" />
 
-      {/* 2. Twinkling / Star Pop Animated Layer */}
+      {/* 2. Ambient Twinkling Sparkle Star Layer */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {STAR_PARTICLES.map((particle, idx) => (
+        {SPARKLE_STARS.map((star, idx) => (
           <div
             key={idx}
-            className={`absolute ${
-              particle.type === "star" ? "animate-star-pop" : "animate-twinkle"
-            }`}
+            className="absolute animate-star-pop"
             style={{
-              top: particle.top,
-              left: particle.left,
-              animationDelay: `${particle.delay}s`,
-              animationDuration: `${particle.duration}s`,
+              top: star.top,
+              left: star.left,
+              animationDelay: `${star.delay}s`,
+              animationDuration: `${star.duration}s`,
             }}
           >
-            {particle.type === "star" ? (
-              <svg
-                viewBox="0 0 24 24"
-                className={`${particle.size} fill-indigo-500/70 text-indigo-500 drop-shadow-[0_0_8px_rgba(99,102,241,0.65)]`}
-              >
-                <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" />
-              </svg>
-            ) : (
-              <div
-                className={`${particle.size} rounded-full bg-gradient-to-tr from-purple-400 to-indigo-500 shadow-[0_0_8px_rgba(168,85,247,0.7)]`}
-              />
-            )}
+            <svg
+              viewBox="0 0 24 24"
+              className={`${star.size} fill-indigo-500/60 text-indigo-500 drop-shadow-[0_0_8px_rgba(99,102,241,0.55)]`}
+            >
+              <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" />
+            </svg>
           </div>
         ))}
       </div>
