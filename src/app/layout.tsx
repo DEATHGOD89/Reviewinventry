@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CustomerCareBot } from "@/components/support/CustomerCareBot";
 import { OfflineStatusBar } from "@/components/ui/OfflineStatusBar";
+import { NetlifyBadgeRemover } from "@/components/ui/NetlifyBadgeRemover";
 
 export const metadata: Metadata = {
   title: "VeriSpec | Verified Industrial Inventory & Trusted Review Intelligence",
@@ -43,6 +44,7 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
         <Footer />
         <CustomerCareBot />
+        <NetlifyBadgeRemover />
       </body>
     </html>
   );

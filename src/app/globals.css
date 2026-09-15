@@ -195,3 +195,25 @@ body {
 .animate-halo-pulse {
   animation: haloPulse 3.5s ease-in-out infinite;
 }
+
+/* Forcibly hide Netlify injected preview drawers, feedback badges & 'Powered by Netlify' tags */
+#netlify-preview-drawer,
+iframe#netlify-drawer,
+iframe[src*="netlify"],
+[data-netlify-deploy-preview],
+.netlify-identity-widget,
+[id*="netlify"],
+[class*="netlify"],
+[data-testid*="netlify"],
+[aria-label*="Netlify"],
+a[href*="netlify.com"],
+a[href*="netlify.app"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  z-index: -9999 !important;
+}
